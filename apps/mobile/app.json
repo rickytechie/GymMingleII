@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "GymMingle Mobile",
+    "slug": "gymmingle-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "jsEngine": "hermes",
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.gymmingle.mobile"
+    },
+    "ios": {
+      "bundleIdentifier": "com.gymmingle.mobile"
+    }
+  }
+}
+
