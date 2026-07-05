@@ -6,7 +6,7 @@ interface ProfileCardProps {
   fallbackProvider?: AvatarProvider
 }
 
-export function ProfileCard({ profile, fallbackProvider = 'unsplash' }: ProfileCardProps) {
+export function ProfileCard({ profile, fallbackProvider = 'photo' }: ProfileCardProps) {
   const imageUrl = resolveAvatarUrl(profile.avatar_url, {
     seed: profile.id || profile.name,
     provider: fallbackProvider,
