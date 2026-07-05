@@ -6,12 +6,12 @@
  * profile — and swapping providers is a one-line change.
  */
 
-export type AvatarProvider = 'dicebear' | 'unsplash'
+export type AvatarProvider = 'photo' | 'illustration'
 
 export interface AvatarOptions {
   /** Stable seed (e.g. profile id or name) so a user always gets the same image. */
   seed: string
-  /** Provider for the generated fallback. Defaults to `dicebear`. */
+  /** Fallback style. `photo` = realistic photography, `illustration` = generated avatar. Defaults to `photo`. */
   provider?: AvatarProvider
   /** Square render size in pixels. Defaults to 400. */
   size?: number
@@ -19,27 +19,26 @@ export interface AvatarOptions {
 
 const DICEBEAR_BASE = 'https://api.dicebear.com/9.x'
 const DICEBEAR_STYLE = 'avataaars'
-const UNSPLASH_BASE = 'https://source.unsplash.com'
-/** Curated Unsplash collection of fitness/portrait photography. */
-const UNSPLASH_FITNESS_COLLECTION = '1163637'
+// Lorem Picsum serves real photography deterministically by seed with no API key.
+const PICSUM_BASE = 'https://picsum.photos'
 
-function slugifySeed(seed: string): string {
-  return encodeURIComponent(seed.trim() || 'gymmingle')
+function normalizeSeed(seed: string): string {
+  return seed.trim() || 'gymmingle'
 }
 
 /** Deterministic illustrated avatar (no API key required, always available). */
 export function getDiceBearAvatar(seed: string, size = 400): string {
   const params = new URLSearchParams({
-    seed: seed.trim() || 'gymmingle',
+    seed: normalizeSeed(seed),
     size: String(size),
     radius: '12',
   })
   return `${DICEBEAR_BASE}/${DICEBEAR_STYLE}/svg?${params.toString()}`
 }
 
-/** Deterministic realistic photograph sourced from an Unsplash collection. */
-export function getUnsplashPhoto(seed: string, size = 400): string {
-  return `${UNSPLASH_BASE}/collection/${UNSPLASH_FITNESS_COLLECTION}/${size}x${size}?sig=${slugifySeed(seed)}`
+/** Deterministic realistic photograph keyed by seed (no API key required). */
+export function getPhoto(seed: string, size = 400): string {
+  return `${PICSUM_BASE}/seed/${encodeURIComponent(normalizeSeed(seed))}/${size}/${size}`
 }
 
 /**
@@ -57,7 +56,7 @@ export function resolveAvatarUrl(
   }
 
   const size = options.size ?? 400
-  return options.provider === 'unsplash'
-    ? getUnsplashPhoto(options.seed, size)
-    : getDiceBearAvatar(options.seed, size)
+  return options.provider === 'illustration'
+    ? getDiceBearAvatar(options.seed, size)
+    : getPhoto(options.seed, size)
 }
