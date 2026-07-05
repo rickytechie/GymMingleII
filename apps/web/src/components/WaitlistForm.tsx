@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from 'react'
-import { isValidEmail, storeWaitlist, createNoopStorage } from '@gymmingle/core'
+import { isValidEmail } from '@gymmingle/core'
+import { supabase } from '@gymmingle/core/src/supabase'
 
 export function WaitlistForm() {
   const [email, setEmail] = useState('')
@@ -10,17 +11,26 @@ export function WaitlistForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     if (!isValidEmail(email)) {
       setStatus('Please enter a valid email address.')
       return
     }
 
     setIsSubmitting(true)
+    setStatus('')
+
     try {
-      await storeWaitlist({ email, sportInterest: 'Fitness', createdAt: new Date().toISOString() }, createNoopStorage())
+      const { error } = await supabase.from('waitlist').insert([{ email }])
+
+      if (error) {
+        throw error
+      }
+
       setStatus('You’re on the list. We’ll be in touch soon.')
       setEmail('')
     } catch (error) {
+      console.error(error)
       setStatus('Something went wrong. Please try again.')
     } finally {
       setIsSubmitting(false)

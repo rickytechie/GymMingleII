@@ -1,7 +1,42 @@
+"use client"
+
+import { useEffect, useState } from 'react'
 import LandingHeader from '../src/components/LandingHeader'
 import WaitlistForm from '../src/components/WaitlistForm'
+import { supabase } from '@gymmingle/core/src/supabase'
+
+type Profile = {
+  id: string
+  name: string
+  bio: string | null
+  avatar_url: string | null
+}
 
 export default function Page() {
+  const [profiles, setProfiles] = useState<Profile[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadProfiles() {
+      try {
+        const { data, error } = await supabase.from('profiles').select('*').limit(25)
+
+        if (error) {
+          throw error
+        }
+
+        setProfiles((data ?? []) as Profile[])
+      } catch {
+        setError('We couldn’t load the profiles right now.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadProfiles()
+  }, [])
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <LandingHeader />
@@ -36,7 +71,43 @@ export default function Page() {
           </div>
         </div>
       </section>
+
       <section className="mx-auto max-w-6xl px-6 pb-16 sm:px-8">
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-slate-900">Meet the community</h2>
+          <p className="mt-2 text-sm text-slate-600">A live snapshot of profiles from Supabase.</p>
+        </div>
+
+        <div className="mb-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {isLoading ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-3">
+              Loading members…
+            </div>
+          ) : error ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-3">
+              {error}
+            </div>
+          ) : (
+            profiles.map((profile) => (
+              <article key={profile.id} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                <div className="aspect-[4/3] bg-slate-100">
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt={profile.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-[#CCFF00]/40 text-lg font-semibold text-slate-700">
+                      {profile.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="p-5">
+                  <h3 className="text-lg font-semibold text-slate-900">{profile.name}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{profile.bio || 'No bio yet.'}</p>
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+
         <WaitlistForm />
       </section>
     </main>
