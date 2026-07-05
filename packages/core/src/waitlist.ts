@@ -1,5 +1,6 @@
 import type { StorageAdapter } from './storage'
 import { isValidEmail } from './validators'
+import { supabase } from './supabase'
 
 export type WaitlistPayload = {
   email: string
@@ -11,6 +12,22 @@ const KEY = 'gymmingle.waitlist.v1'
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase()
+}
+
+/**
+ * Validate an email and persist it to the Supabase `waitlist` table.
+ * Throws when the email is invalid or the insert fails.
+ */
+export async function joinWaitlist(email: string): Promise<void> {
+  if (!isValidEmail(email)) {
+    throw new Error('Please enter a valid email address.')
+  }
+
+  const { error } = await supabase.from('waitlist').insert([{ email: normalizeEmail(email) }])
+
+  if (error) {
+    throw error
+  }
 }
 
 export async function storeWaitlist(

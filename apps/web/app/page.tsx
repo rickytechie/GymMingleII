@@ -1,16 +1,11 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import LandingHeader from '../src/components/LandingHeader'
 import WaitlistForm from '../src/components/WaitlistForm'
-import { supabase } from '@gymmingle/core/src/supabase'
-
-type Profile = {
-  id: string
-  name: string
-  bio: string | null
-  avatar_url: string | null
-}
+import ProfileCard from '../src/components/ProfileCard'
+import { fetchProfiles, type Profile } from '@gymmingle/core'
 
 export default function Page() {
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -18,23 +13,28 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function loadProfiles() {
-      try {
-        const { data, error } = await supabase.from('profiles').select('*').limit(25)
+    let active = true
 
-        if (error) {
-          throw error
+    fetchProfiles()
+      .then((data) => {
+        if (active) {
+          setProfiles(data)
         }
+      })
+      .catch(() => {
+        if (active) {
+          setError('We couldn’t load the profiles right now.')
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setIsLoading(false)
+        }
+      })
 
-        setProfiles((data ?? []) as Profile[])
-      } catch {
-        setError('We couldn’t load the profiles right now.')
-      } finally {
-        setIsLoading(false)
-      }
+    return () => {
+      active = false
     }
-
-    loadProfiles()
   }, [])
 
   return (
@@ -55,9 +55,9 @@ export default function Page() {
             <a href="#waitlist" className="rounded-full bg-[#CCFF00] px-6 py-3 font-semibold text-slate-950 transition hover:opacity-90">
               Join the waitlist
             </a>
-            <a href="#" className="rounded-full border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:border-[#FF6B35] hover:text-[#FF6B35]">
+            <Link href="/concept" className="rounded-full border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:border-[#FF6B35] hover:text-[#FF6B35]">
               Explore the concept
-            </a>
+            </Link>
           </div>
         </div>
         <div className="w-full max-w-md rounded-[2rem] border border-slate-200 bg-white p-8 shadow-xl">
@@ -87,24 +87,12 @@ export default function Page() {
             <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-3">
               {error}
             </div>
+          ) : profiles.length === 0 ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500 md:col-span-2 xl:col-span-3">
+              No members yet — be the first to join.
+            </div>
           ) : (
-            profiles.map((profile) => (
-              <article key={profile.id} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                <div className="aspect-[4/3] bg-slate-100">
-                  {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt={profile.name} className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center bg-[#CCFF00]/40 text-lg font-semibold text-slate-700">
-                      {profile.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div className="p-5">
-                  <h3 className="text-lg font-semibold text-slate-900">{profile.name}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{profile.bio || 'No bio yet.'}</p>
-                </div>
-              </article>
-            ))
+            profiles.map((profile) => <ProfileCard key={profile.id} profile={profile} />)
           )}
         </div>
 

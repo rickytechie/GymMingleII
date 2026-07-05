@@ -25,3 +25,7 @@ dist-ssr
 
 .next/
 coverage/
+
+# Build tooling artifacts
+.turbo/
+*.tsbuildinfo

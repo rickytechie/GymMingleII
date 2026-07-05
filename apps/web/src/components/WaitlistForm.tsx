@@ -1,8 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { isValidEmail } from '@gymmingle/core'
-import { supabase } from '@gymmingle/core/src/supabase'
+import { isValidEmail, joinWaitlist } from '@gymmingle/core'
 
 export function WaitlistForm() {
   const [email, setEmail] = useState('')
@@ -21,12 +20,7 @@ export function WaitlistForm() {
     setStatus('')
 
     try {
-      const { error } = await supabase.from('waitlist').insert([{ email }])
-
-      if (error) {
-        throw error
-      }
-
+      await joinWaitlist(email)
       setStatus('You’re on the list. We’ll be in touch soon.')
       setEmail('')
     } catch (error) {
