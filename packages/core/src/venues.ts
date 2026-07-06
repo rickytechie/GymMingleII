@@ -261,6 +261,16 @@ export const CITY_REGIONS: Record<string, RegionConfig> = {
   san_antonio: { label: 'San Antonio', center: { latitude: 29.4241, longitude: -98.4936 }, radius: 12000 },
   detroit: { label: 'Detroit', center: { latitude: 42.3314, longitude: -83.0458 }, radius: 12000 },
   chicago: { label: 'Chicago', center: { latitude: 41.8781, longitude: -87.6298 }, radius: 15000 },
+  buffalo: { label: 'Buffalo', center: { latitude: 42.8864, longitude: -78.8784 }, radius: 10000 },
+  glen_cove: { label: 'Glen Cove', center: { latitude: 40.8623, longitude: -73.6337 }, radius: 5000 },
+  new_rochelle: { label: 'New Rochelle', center: { latitude: 40.9115, longitude: -73.7824 }, radius: 5000 },
+  sea_cliff: { label: 'Sea Cliff', center: { latitude: 40.8489, longitude: -73.6447 }, radius: 3000 },
+  grand_rapids: { label: 'Grand Rapids', center: { latitude: 42.9634, longitude: -85.6681 }, radius: 10000 },
+  orlando: { label: 'Orlando', center: { latitude: 28.5383, longitude: -81.3792 }, radius: 12000 },
+  jacksonville: { label: 'Jacksonville', center: { latitude: 30.3322, longitude: -81.6557 }, radius: 12000 },
+  new_orleans: { label: 'New Orleans', center: { latitude: 29.9511, longitude: -90.0715 }, radius: 10000 },
+  amherst: { label: 'Amherst', center: { latitude: 42.3789, longitude: -72.5219 }, radius: 5000 },
+  nashville: { label: 'Nashville', center: { latitude: 36.1627, longitude: -86.7816 }, radius: 12000 },
 }
 
 export const multiCityVenues: CuratedVenue[] = [
@@ -341,6 +351,64 @@ export const multiCityVenues: CuratedVenue[] = [
   { id: 'venue_chi_004', name: 'King Spa Chicago', address: '809 W 115th St, Chicago, IL 60643', location: { latitude: 41.6832, longitude: -87.6451 }, rating: 4.3, userRatingCount: 980, photoNames: [], types: ['spa', 'health'], regionId: 'chicago', category: 'Wellness' },
   { id: 'venue_chi_005', name: 'Pilot Project Brewing', address: '2140 N Milwaukee Ave, Chicago, IL 60647', location: { latitude: 41.9187, longitude: -87.6978 }, rating: 4.4, userRatingCount: 1200, photoNames: [], types: ['restaurant', 'bar'], regionId: 'chicago', category: 'Dining' },
   { id: 'venue_chi_006', name: 'Wilson Skate Park', address: '1141 W Wilson Ave, Chicago, IL 60640', location: { latitude: 41.9651, longitude: -87.6569 }, rating: 4.3, userRatingCount: 340, photoNames: [], types: ['skate_park', 'park'], regionId: 'chicago', category: 'Skatepark' },
+
+  // — Buffalo —
+  { id: 'venue_buf_001', name: 'Jada Blitz Fitness', address: '680 Delaware Ave, Buffalo, NY 14209', location: { latitude: 42.9060, longitude: -78.8710 }, rating: 4.2, userRatingCount: 890, photoNames: [], types: ['gym', 'fitness_center'], regionId: 'buffalo', category: 'Fitness' },
+  { id: 'venue_buf_002', name: 'Buffalo RiverWorks', address: '359 Ganson St, Buffalo, NY 14203', location: { latitude: 42.8698, longitude: -78.8737 }, rating: 4.3, userRatingCount: 2100, photoNames: [], types: ['music_venue', 'bar', 'outdoor'], regionId: 'buffalo', category: 'Music' },
+  { id: 'venue_buf_003', name: 'Delaware Park', address: '84 Parkside Ave, Buffalo, NY 14214', location: { latitude: 42.9317, longitude: -78.8499 }, rating: 4.6, userRatingCount: 4500, photoNames: [], types: ['park', 'outdoor'], regionId: 'buffalo', category: 'Outdoor' },
+  { id: 'venue_buf_004', name: 'The Dinner Bell Diner', address: '745 Elmwood Ave, Buffalo, NY 14222', location: { latitude: 42.9126, longitude: -78.8778 }, rating: 4.4, userRatingCount: 1100, photoNames: [], types: ['restaurant'], regionId: 'buffalo', category: 'Dining' },
+
+  // — Glen Cove —
+  { id: 'venue_gc_001', name: 'Glen Cove Fitness', address: '75 Glen St, Glen Cove, NY 11542', location: { latitude: 40.8626, longitude: -73.6331 }, rating: 4.0, userRatingCount: 340, photoNames: [], types: ['gym', 'fitness_center'], regionId: 'glen_cove', category: 'Fitness' },
+  { id: 'venue_gc_002', name: 'Temple Beth Israel Fitness Center', address: '14 Terrace Ave, Glen Cove, NY 11542', location: { latitude: 40.8647, longitude: -73.6348 }, rating: 3.8, userRatingCount: 120, photoNames: [], types: ['fitness_center'], regionId: 'glen_cove', category: 'Fitness' },
+  { id: 'venue_gc_003', name: 'Glen Cove Beach & Boardwalk', address: '65 Shore Rd, Glen Cove, NY 11542', location: { latitude: 40.8702, longitude: -73.6484 }, rating: 4.5, userRatingCount: 980, photoNames: [], types: ['park', 'outdoor'], regionId: 'glen_cove', category: 'Outdoor' },
+  { id: 'venue_gc_004', name: 'La Bussola Restaurant', address: '40 School St, Glen Cove, NY 11542', location: { latitude: 40.8670, longitude: -73.6311 }, rating: 4.3, userRatingCount: 560, photoNames: [], types: ['restaurant'], regionId: 'glen_cove', category: 'Dining' },
+
+  // — New Rochelle —
+  { id: 'venue_nr_001', name: 'New Rochelle Fitness Center', address: '25 Lecount Pl, New Rochelle, NY 10801', location: { latitude: 40.9125, longitude: -73.7833 }, rating: 4.1, userRatingCount: 620, photoNames: [], types: ['gym', 'fitness_center'], regionId: 'new_rochelle', category: 'Fitness' },
+  { id: 'venue_nr_002', name: 'Hudson Park', address: '10 Hudson Park Rd, New Rochelle, NY 10805', location: { latitude: 40.8906, longitude: -73.7932 }, rating: 4.6, userRatingCount: 1100, photoNames: [], types: ['park', 'outdoor'], regionId: 'new_rochelle', category: 'Outdoor' },
+  { id: 'venue_nr_003', name: 'Mavis Nightclub', address: '1 Radisson Plaza, New Rochelle, NY 10801', location: { latitude: 40.9118, longitude: -73.7855 }, rating: 4.2, userRatingCount: 780, photoNames: [], types: ['nightclub', 'music_venue'], regionId: 'new_rochelle', category: 'Nightlife' },
+  { id: 'venue_nr_004', name: 'Posto 22 Ristorante', address: '150 North Ave, New Rochelle, NY 10801', location: { latitude: 40.9142, longitude: -73.7793 }, rating: 4.5, userRatingCount: 650, photoNames: [], types: ['restaurant'], regionId: 'new_rochelle', category: 'Dining' },
+
+  // — Sea Cliff —
+  { id: 'venue_sc_001', name: 'Sea Cliff Yoga', address: '104 7th Ave, Sea Cliff, NY 11579', location: { latitude: 40.8485, longitude: -73.6439 }, rating: 4.4, userRatingCount: 180, photoNames: [], types: ['yoga_studio', 'health'], regionId: 'sea_cliff', category: 'Wellness' },
+  { id: 'venue_sc_002', name: 'Sea Cliff Beach', address: '1 Sea Cliff Ave, Sea Cliff, NY 11579', location: { latitude: 40.8450, longitude: -73.6476 }, rating: 4.3, userRatingCount: 420, photoNames: [], types: ['park', 'outdoor'], regionId: 'sea_cliff', category: 'Outdoor' },
+  { id: 'venue_sc_003', name: 'The View Grill', address: '71 Roslyn Ave, Sea Cliff, NY 11579', location: { latitude: 40.8490, longitude: -73.6424 }, rating: 4.2, userRatingCount: 310, photoNames: [], types: ['restaurant', 'bar'], regionId: 'sea_cliff', category: 'Dining' },
+
+  // — Grand Rapids —
+  { id: 'venue_gr_001', name: 'Family Fitness Grand Rapids', address: '2000 Employment Way, Grand Rapids, MI 49504', location: { latitude: 42.9269, longitude: -85.7026 }, rating: 4.1, userRatingCount: 450, photoNames: [], types: ['gym', 'fitness_center'], regionId: 'grand_rapids', category: 'Fitness' },
+  { id: 'venue_gr_002', name: 'The Intersection', address: '133 Grandville Ave SW, Grand Rapids, MI 49503', location: { latitude: 42.9577, longitude: -85.6707 }, rating: 4.5, userRatingCount: 2100, photoNames: [], types: ['music_venue', 'nightclub'], regionId: 'grand_rapids', category: 'Music' },
+  { id: 'venue_gr_003', name: 'Grand Rapids Art Museum', address: '101 Monroe Center St NW, Grand Rapids, MI 49503', location: { latitude: 42.9648, longitude: -85.6704 }, rating: 4.5, userRatingCount: 3200, photoNames: [], types: ['museum', 'art_gallery'], regionId: 'grand_rapids', category: 'Arts' },
+  { id: 'venue_gr_004', name: 'Millennium Park', address: '1415 Maynard Ave SW, Grand Rapids, MI 49534', location: { latitude: 42.8759, longitude: -85.7485 }, rating: 4.7, userRatingCount: 4100, photoNames: [], types: ['park', 'outdoor'], regionId: 'grand_rapids', category: 'Outdoor' },
+
+  // — Orlando —
+  { id: 'venue_orl_001', name: 'Orlando Gym & Fitness', address: '600 N Garland Ave, Orlando, FL 32801', location: { latitude: 28.5497, longitude: -81.3797 }, rating: 4.2, userRatingCount: 980, photoNames: [], types: ['gym', 'fitness_center'], regionId: 'orlando', category: 'Fitness' },
+  { id: 'venue_orl_002', name: 'The Vanguard', address: '578 N Orange Ave, Orlando, FL 32801', location: { latitude: 28.5481, longitude: -81.3790 }, rating: 4.4, userRatingCount: 1500, photoNames: [], types: ['music_venue', 'nightclub'], regionId: 'orlando', category: 'Music' },
+  { id: 'venue_orl_003', name: 'Lake Eola Park', address: '512 E Washington St, Orlando, FL 32801', location: { latitude: 28.5432, longitude: -81.3748 }, rating: 4.7, userRatingCount: 8900, photoNames: [], types: ['park', 'outdoor'], regionId: 'orlando', category: 'Outdoor' },
+  { id: 'venue_orl_004', name: 'The Woods', address: '24 W Washington St, Orlando, FL 32801', location: { latitude: 28.5437, longitude: -81.3782 }, rating: 4.3, userRatingCount: 870, photoNames: [], types: ['restaurant', 'bar'], regionId: 'orlando', category: 'Dining' },
+
+  // — Jacksonville —
+  { id: 'venue_jax_001', name: 'BAE Systems Fitness Center', address: '10101-102, New Berlin Rd, Jacksonville, FL 32226', location: { latitude: 30.4770, longitude: -81.5834 }, rating: 4.0, userRatingCount: 230, photoNames: [], types: ['gym', 'fitness_center'], regionId: 'jacksonville', category: 'Fitness' },
+  { id: 'venue_jax_002', name: 'Daily\'s Place', address: '1 Daily\'s Pl, Jacksonville, FL 32202', location: { latitude: 30.3226, longitude: -81.6564 }, rating: 4.5, userRatingCount: 3400, photoNames: [], types: ['music_venue', 'outdoor'], regionId: 'jacksonville', category: 'Music' },
+  { id: 'venue_jax_003', name: 'Jacksonville Beach', address: '110 1st Ave N, Jacksonville Beach, FL 32250', location: { latitude: 30.2870, longitude: -81.3924 }, rating: 4.6, userRatingCount: 7200, photoNames: [], types: ['park', 'outdoor'], regionId: 'jacksonville', category: 'Outdoor' },
+  { id: 'venue_jax_004', name: 'Cummer Museum of Art', address: '829 Riverside Ave, Jacksonville, FL 32204', location: { latitude: 30.3189, longitude: -81.6780 }, rating: 4.6, userRatingCount: 2800, photoNames: [], types: ['museum', 'art_gallery'], regionId: 'jacksonville', category: 'Arts' },
+
+  // — New Orleans —
+  { id: 'venue_nola_001', name: 'Elite Fitness New Orleans', address: '800 Conti St, New Orleans, LA 70112', location: { latitude: 29.9551, longitude: -90.0710 }, rating: 4.1, userRatingCount: 670, photoNames: [], types: ['gym', 'fitness_center'], regionId: 'new_orleans', category: 'Fitness' },
+  { id: 'venue_nola_002', name: 'Tipitina\'s', address: '501 Napoleon Ave, New Orleans, LA 70115', location: { latitude: 29.9178, longitude: -90.1016 }, rating: 4.6, userRatingCount: 4500, photoNames: [], types: ['music_venue', 'nightclub'], regionId: 'new_orleans', category: 'Music' },
+  { id: 'venue_nola_003', name: 'Audubon Park', address: '6500 Magazine St, New Orleans, LA 70118', location: { latitude: 29.9229, longitude: -90.1300 }, rating: 4.7, userRatingCount: 6800, photoNames: [], types: ['park', 'outdoor'], regionId: 'new_orleans', category: 'Outdoor' },
+  { id: 'venue_nola_004', name: 'Commander\'s Palace', address: '1403 Washington Ave, New Orleans, LA 70130', location: { latitude: 29.9281, longitude: -90.0867 }, rating: 4.7, userRatingCount: 12000, photoNames: [], types: ['restaurant'], regionId: 'new_orleans', category: 'Dining' },
+
+  // — Amherst —
+  { id: 'venue_amh_001', name: 'Amherst College Fitness Center', address: '160 N Pleasant St, Amherst, MA 01002', location: { latitude: 42.3787, longitude: -72.5210 }, rating: 4.3, userRatingCount: 560, photoNames: [], types: ['gym', 'fitness_center'], regionId: 'amherst', category: 'Fitness' },
+  { id: 'venue_amh_002', name: 'Puffer\'s Pond', address: '84 Amity St, Amherst, MA 01002', location: { latitude: 42.3902, longitude: -72.5148 }, rating: 4.4, userRatingCount: 780, photoNames: [], types: ['park', 'outdoor'], regionId: 'amherst', category: 'Outdoor' },
+  { id: 'venue_amh_003', name: 'The Hangar', address: '179 N Pleasant St, Amherst, MA 01002', location: { latitude: 42.3802, longitude: -72.5203 }, rating: 4.1, userRatingCount: 340, photoNames: [], types: ['music_venue', 'bar'], regionId: 'amherst', category: 'Music' },
+
+  // — Nashville —
+  { id: 'venue_nash_001', name: 'Nashville Athletic Club', address: '311 27th Ave N, Nashville, TN 37203', location: { latitude: 36.1527, longitude: -86.8000 }, rating: 4.3, userRatingCount: 890, photoNames: [], types: ['gym', 'fitness_center'], regionId: 'nashville', category: 'Fitness' },
+  { id: 'venue_nash_002', name: 'Ryman Auditorium', address: '116 5th Ave N, Nashville, TN 37219', location: { latitude: 36.1611, longitude: -86.7766 }, rating: 4.8, userRatingCount: 18000, photoNames: [], types: ['music_venue', 'theatre'], regionId: 'nashville', category: 'Music' },
+  { id: 'venue_nash_003', name: 'Centennial Park', address: '2500 West End Ave, Nashville, TN 37203', location: { latitude: 36.1500, longitude: -86.8124 }, rating: 4.6, userRatingCount: 11000, photoNames: [], types: ['park', 'outdoor'], regionId: 'nashville', category: 'Outdoor' },
+  { id: 'venue_nash_004', name: 'The Catbird Seat', address: '1711 Division St, Nashville, TN 37203', location: { latitude: 36.1498, longitude: -86.7952 }, rating: 4.6, userRatingCount: 1200, photoNames: [], types: ['restaurant'], regionId: 'nashville', category: 'Dining' },
 ]
 
 function findRegionKey(region: RegionConfig): string {

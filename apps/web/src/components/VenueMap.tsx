@@ -4,7 +4,8 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MAP_CONFIG } from '@gymmingle/core'
-import type { LifestyleVenue, RegionConfig, VenueCategory } from '@gymmingle/core'
+import type { RegionConfig, VenueCategory } from '@gymmingle/core'
+import type { CuratedVenue } from '@gymmingle/core'
 import { filterXSS } from 'xss'
 
 const XSS_OPTIONS = { stripIgnoreTag: true, stripIgnoreTagBody: ['script', 'style'] }
@@ -56,9 +57,9 @@ function makeSquareIcon(category: VenueCategory, highlight: boolean): L.DivIcon 
 }
 
 interface VenueMapProps {
-  venues: LifestyleVenue[]
+  venues: CuratedVenue[]
   region: RegionConfig
-  onVenueSelect?: (venue: LifestyleVenue) => void
+  onVenueSelect?: (venue: CuratedVenue) => void
 }
 
 export function VenueMap({ venues, region, onVenueSelect }: VenueMapProps) {
@@ -107,7 +108,7 @@ export function VenueMap({ venues, region, onVenueSelect }: VenueMapProps) {
     }
 
     // Group venues by category
-    const grouped = new Map<VenueCategory, LifestyleVenue[]>()
+    const grouped = new Map<VenueCategory, CuratedVenue[]>()
     for (const venue of venues) {
       const cat = venue.category ?? 'Fitness'
       if (!grouped.has(cat)) grouped.set(cat, [])
@@ -122,24 +123,18 @@ export function VenueMap({ venues, region, onVenueSelect }: VenueMapProps) {
       for (const venue of catVenues) {
         if (!venue.location) continue
 
-        const highlight = venue.vibeScore >= 70
         const marker = L.marker([venue.location.latitude, venue.location.longitude], {
-          icon: makeSquareIcon(category, highlight),
+          icon: makeSquareIcon(category, venue.rating >= 4.5),
         })
-
-        const tags = venue.lifestyleTags.map((t) =>
-          `<span class="venuemap-tag">${sanitize(t)}</span>`
-        ).join('')
 
         marker.bindPopup(`
           <div class="venuemap-popup">
             <span class="venuemap-popup-cat" style="background:${CATEGORY_COLORS[category]};color:#0f0f0f">${category}</span>
             <h3 class="venuemap-popup-title">${sanitize(venue.name)}</h3>
             ${venue.address ? `<p class="venuemap-popup-addr">${sanitize(venue.address)}</p>` : ''}
-            <div class="venuemap-popup-tags">${tags}</div>
             <div class="venuemap-popup-footer">
-              <span class="venuemap-vibe">Vibe ${venue.vibeScore}</span>
-              ${venue.distance != null ? `<span class="venuemap-dist">${(venue.distance / 1000).toFixed(1)} km</span>` : ''}
+              <span class="venuemap-vibe">⭐ ${venue.rating.toFixed(1)}</span>
+              <span>${venue.userRatingCount.toLocaleString()} reviews</span>
             </div>
           </div>
         `)

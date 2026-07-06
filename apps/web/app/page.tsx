@@ -1,29 +1,30 @@
 "use client"
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import LandingHeader from '../src/components/LandingHeader'
 import WaitlistForm from '../src/components/WaitlistForm'
 import ProfileCard from '../src/components/ProfileCard'
-import { fetchProfiles, getDemoProfiles, coastalBrutalism, NYC_REGIONS, PremiumTier, LifestyleEngine } from '@gymmingle/core'
-import type { Profile, LifestyleVenue } from '@gymmingle/core'
+import { fetchProfiles, getDemoProfiles, coastalBrutalism, CITY_REGIONS, PremiumTier, multiCityVenues } from '@gymmingle/core'
+import type { Profile } from '@gymmingle/core'
 
 const VenueMap = dynamic(() => import('../src/components/VenueMap'), { ssr: false })
+const PricingCards = dynamic(() => import('../src/components/PricingCards'), { ssr: false })
+const CuratedDateEngine = dynamic(() => import('../src/components/CuratedDateEngine'), { ssr: false })
 
-const engine = new LifestyleEngine()
+const cityKeys = Object.entries(CITY_REGIONS)
 
 export default function Page() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [activeVenueTab, setActiveVenueTab] = useState('manhattan')
-  const [venues, setVenues] = useState<LifestyleVenue[]>([])
-  const [venuesLoading, setVenuesLoading] = useState(true)
+  const [activeCity, setActiveCity] = useState('nyc')
+  const activeRegion = CITY_REGIONS[activeCity]
+  const demoProfiles = useMemo(() => getDemoProfiles(), [])
+  const venues = useMemo(
+    () => multiCityVenues.filter((v) => v.regionId === activeCity),
+    [activeCity],
+  )
 
-  const demoProfiles = getDemoProfiles()
-  const regions = Object.entries(NYC_REGIONS)
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let active = true
 
@@ -39,22 +40,7 @@ export default function Page() {
       })
 
     return () => { active = false }
-  }, [])
-
-  useEffect(() => {
-    let active = true
-    const region = NYC_REGIONS[activeVenueTab]
-    if (region) {
-      engine.discoverVenues(region).then((results) => {
-        if (active) setVenues(results)
-      }).catch(() => {
-        if (active) setVenues([])
-      }).finally(() => {
-        if (active) setVenuesLoading(false)
-      })
-    }
-    return () => { active = false }
-  }, [activeVenueTab])
+  }, [demoProfiles])
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -64,13 +50,13 @@ export default function Page() {
       <section className="coastal-section mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-2xl space-y-6">
           <span className="inline-flex rounded-full border border-[#CCFF00] bg-[#CCFF00]/15 px-3 py-1 text-sm font-semibold text-slate-800">
-            Lifestyle Orchestration Engine · Live
+            Lifestyle Orchestration Engine · 18 Cities
           </span>
           <h1 className="text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
             Your fitness. Your rules. Your tribe.
           </h1>
           <p className="max-w-xl text-lg text-slate-600">
-            GymMingle connects NYC and Nassau athletes through shared movement,
+            GymMingle connects athletes across 18+ city markets through shared movement,
             lifestyle synergy, and premium MingleCoin-powered experiences.
           </p>
           <div className="flex flex-wrap gap-4">
@@ -80,12 +66,12 @@ export default function Page() {
             >
               Explore venues
             </a>
-            <Link
-              href="/concept"
+            <a
+              href="#date-engine"
               className="rounded-full border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:border-[#FF6B35] hover:text-[#FF6B35]"
             >
-              How it works
-            </Link>
+              Curated dates
+            </a>
           </div>
         </div>
 
@@ -115,12 +101,25 @@ export default function Page() {
         </div>
       </section>
 
+      {/* PRICING SECTION */}
+      <section className="mx-auto max-w-6xl px-6 pb-20 sm:px-8">
+        <div className="mb-10">
+          <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+            Choose your tier
+          </h2>
+          <p className="mt-2 text-slate-500">
+            USD pricing · MingleCoin (MC) equivalent: <strong>1 USD = 100 MC</strong>
+          </p>
+        </div>
+        <PricingCards />
+      </section>
+
       {/* DEMO PROFILES */}
       <section className="mx-auto max-w-6xl px-6 pb-16 sm:px-8">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold text-slate-900">Meet the community</h2>
           <p className="mt-2 text-sm text-slate-600">
-            Live profiles from Supabase
+            Demo profiles spanning NYC, Boston, LA, Chicago, Miami, Detroit
             <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-[#CCFF00] bg-[#CCFF00]/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-800">
               <span className="h-1.5 w-1.5 rounded-full bg-[#CCFF00]" />
               MingleCoins enabled
@@ -180,26 +179,23 @@ export default function Page() {
               Discover venues that match your vibe
             </h2>
             <p className="mt-3 max-w-xl text-white/60">
-              Powered by OpenStreetMap + Leaflet — no API key required, always free.
+              Curated venues across 18 markets — powered by OpenStreetMap + Leaflet.
             </p>
           </div>
 
-          {/* REGION TABS */}
-          <div className="mb-8 flex flex-wrap gap-3">
-            {regions.map(([key, region]) => (
+          {/* CITY SELECTOR */}
+          <div className="mb-8 flex flex-wrap gap-2">
+            {cityKeys.map(([key, city]) => (
               <button
                 key={key}
-                onClick={() => {
-                  setVenuesLoading(true)
-                  setActiveVenueTab(key)
-                }}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  activeVenueTab === key
+                onClick={() => setActiveCity(key)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                  activeCity === key
                     ? 'bg-electric-lime text-slate-950'
                     : 'glass text-white/70 hover:text-white'
                 }`}
               >
-                {region.label}
+                {city.label}
               </button>
             ))}
           </div>
@@ -207,42 +203,33 @@ export default function Page() {
           {/* MAP + VENUE LIST */}
           <div className="flex flex-col gap-8 lg:flex-row">
             <div className="h-[400px] w-full overflow-hidden rounded-2xl border border-white/10 lg:h-[600px] lg:w-3/5">
-              <VenueMap venues={venues} region={NYC_REGIONS[activeVenueTab]} />
+              {activeRegion && <VenueMap venues={venues} region={activeRegion} />}
             </div>
 
             <div className="flex-1 space-y-4">
-              {venuesLoading ? (
+              {venues.length === 0 ? (
                 <div className="flex h-full items-center justify-center">
-                  <p className="text-sm text-white/40">Loading venues from OpenStreetMap…</p>
-                </div>
-              ) : venues.length === 0 ? (
-                <div className="flex h-full items-center justify-center">
-                  <p className="text-sm text-white/30">No venues found in this area.</p>
+                  <p className="text-sm text-white/30">No curated venues yet for this city.</p>
                 </div>
               ) : (
-                venues.slice(0, 6).map((venue) => (
+                venues.slice(0, 10).map((venue) => (
                   <div key={venue.id} className="glass-card flex items-start gap-4 p-4">
                     <div className={`mt-1 h-3 w-3 flex-shrink-0 rounded-full ${
-                      venue.vibeScore >= 70 ? 'bg-electric-lime' : venue.vibeScore >= 40 ? 'bg-sunset-orange' : 'bg-white/30'
+                      venue.rating >= 4.5 ? 'bg-electric-lime' : venue.rating >= 4.0 ? 'bg-sunset-orange' : 'bg-white/30'
                     }`} />
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-sm font-bold text-white">{venue.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-white">{venue.name}</h3>
+                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/50">
+                          {venue.category}
+                        </span>
+                      </div>
                       {venue.address && (
                         <p className="mt-0.5 truncate text-xs text-white/40">{venue.address}</p>
                       )}
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {venue.lifestyleTags.slice(0, 3).map((tag) => (
-                          <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/50">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="mt-2 flex items-center gap-3 text-xs text-white/40">
-                        <span className="font-bold text-electric-lime">Vibe {venue.vibeScore}</span>
-                        {venue.distance != null && (
-                          <span>{(venue.distance / 1000).toFixed(1)} km</span>
-                        )}
-                        <span className="capitalize">{venue.crowdDensity}</span>
+                      <div className="mt-1 flex items-center gap-3 text-xs text-white/40">
+                        <span>⭐ {venue.rating.toFixed(1)}</span>
+                        <span>{venue.userRatingCount.toLocaleString()} reviews</span>
                       </div>
                     </div>
                   </div>
@@ -258,6 +245,22 @@ export default function Page() {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* CURATED DATE ENGINE */}
+      <section id="date-engine" className="mx-auto max-w-6xl px-6 py-20 sm:px-8">
+        <div className="mb-10">
+          <span className="inline-flex rounded-full border border-[#CCFF00] bg-[#CCFF00]/15 px-3 py-1 text-sm font-semibold text-slate-800">
+            3-Stage Curated Date Engine
+          </span>
+          <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+            Plan your perfect date
+          </h2>
+          <p className="mt-2 text-slate-500">
+            Sweat → Nourish → Unwind. Select a duration and build a 3-stage date from curated venues.
+          </p>
+        </div>
+        <CuratedDateEngine cityKey={activeCity} />
       </section>
 
       <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
