@@ -52,11 +52,11 @@ export default function ConceptPage() {
           The concept
         </span>
         <h1 className="mt-6 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
-          Fitness is better with the right people and the right place.
+          Where fitness, wellness, and connection converge.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">
-          GymMingle is a hybrid matching platform that connects athletes by how they train, then
-          points them to venues built for it — a single, shared experience across web and mobile.
+          Curated matching that pairs you with people who align with your lifestyle, energy, and
+          intentions — a high-intent ecosystem built around who you are, not just where you train.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <a
