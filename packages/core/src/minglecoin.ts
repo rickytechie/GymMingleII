@@ -3,6 +3,7 @@ export enum PremiumTier {
   Starter = 'starter',
   Premium = 'premium',
   Elite = 'elite',
+  Apex = 'apex',
 }
 
 export enum PremiumFeature {
@@ -17,6 +18,16 @@ export enum PremiumFeature {
   KinkDiscovery = 'kink_discovery',
   CuratedDateDiscovery = 'curated_date_discovery',
   VenuePerks = 'venue_perks',
+  ExpandedHistory = 'expanded_history',
+  BasicTemplates = 'basic_templates',
+  Analytics = 'analytics',
+  ExclusiveLocalEvents = 'exclusive_local_events',
+  PartnerGymAccess = 'partner_gym_access',
+  PrioritySupport = 'priority_support',
+  HighCoinEarning = 'high_coin_earning',
+  ConciergeBooking = 'concierge_booking',
+  OneOnOneCoaching = 'one_on_one_coaching',
+  VIPVenueEntry = 'vip_venue_entry',
 }
 
 export interface MingleCoinAccount {
@@ -49,6 +60,8 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
   [PremiumTier.Starter]: [
     PremiumFeature.AdvancedChat,
     PremiumFeature.VenueInsights,
+    PremiumFeature.ExpandedHistory,
+    PremiumFeature.BasicTemplates,
   ],
   [PremiumTier.Premium]: [
     PremiumFeature.AdvancedChat,
@@ -58,6 +71,10 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
     PremiumFeature.LifestyleFilters,
     PremiumFeature.CuratedDateDiscovery,
     PremiumFeature.VenuePerks,
+    PremiumFeature.ExpandedHistory,
+    PremiumFeature.BasicTemplates,
+    PremiumFeature.Analytics,
+    PremiumFeature.ExclusiveLocalEvents,
   ],
   [PremiumTier.Elite]: [
     PremiumFeature.AdvancedChat,
@@ -71,6 +88,36 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
     PremiumFeature.KinkDiscovery,
     PremiumFeature.CuratedDateDiscovery,
     PremiumFeature.VenuePerks,
+    PremiumFeature.ExpandedHistory,
+    PremiumFeature.BasicTemplates,
+    PremiumFeature.Analytics,
+    PremiumFeature.ExclusiveLocalEvents,
+    PremiumFeature.PartnerGymAccess,
+    PremiumFeature.PrioritySupport,
+    PremiumFeature.HighCoinEarning,
+  ],
+  [PremiumTier.Apex]: [
+    PremiumFeature.AdvancedChat,
+    PremiumFeature.UnlimitedLikes,
+    PremiumFeature.VenueInsights,
+    PremiumFeature.ReadReceipts,
+    PremiumFeature.PriorityMatching,
+    PremiumFeature.IncognitoMode,
+    PremiumFeature.VerifiedBadge,
+    PremiumFeature.LifestyleFilters,
+    PremiumFeature.KinkDiscovery,
+    PremiumFeature.CuratedDateDiscovery,
+    PremiumFeature.VenuePerks,
+    PremiumFeature.ExpandedHistory,
+    PremiumFeature.BasicTemplates,
+    PremiumFeature.Analytics,
+    PremiumFeature.ExclusiveLocalEvents,
+    PremiumFeature.PartnerGymAccess,
+    PremiumFeature.PrioritySupport,
+    PremiumFeature.HighCoinEarning,
+    PremiumFeature.ConciergeBooking,
+    PremiumFeature.OneOnOneCoaching,
+    PremiumFeature.VIPVenueEntry,
   ],
 }
 
@@ -79,6 +126,7 @@ const TIER_MONTHLY_COST = {
   [PremiumTier.Starter]: 500,
   [PremiumTier.Premium]: 1500,
   [PremiumTier.Elite]: 3500,
+  [PremiumTier.Apex]: 7500,
 }
 
 export function getTierFeatures(tier: PremiumTier): PremiumFeature[] {
@@ -98,6 +146,16 @@ export function getFeatureCost(feature: PremiumFeature): number {
     [PremiumFeature.KinkDiscovery]: 350,
     [PremiumFeature.CuratedDateDiscovery]: 400,
     [PremiumFeature.VenuePerks]: 250,
+    [PremiumFeature.ExpandedHistory]: 75,
+    [PremiumFeature.BasicTemplates]: 50,
+    [PremiumFeature.Analytics]: 200,
+    [PremiumFeature.ExclusiveLocalEvents]: 300,
+    [PremiumFeature.PartnerGymAccess]: 500,
+    [PremiumFeature.PrioritySupport]: 400,
+    [PremiumFeature.HighCoinEarning]: 350,
+    [PremiumFeature.ConciergeBooking]: 800,
+    [PremiumFeature.OneOnOneCoaching]: 600,
+    [PremiumFeature.VIPVenueEntry]: 700,
   }
   return costs[feature]
 }
@@ -135,11 +193,11 @@ export function canAccessVenuePerks(account: MingleCoinAccount): boolean {
 }
 
 export function isPremiumStatus(account: MingleCoinAccount): boolean {
-  return account.tier === PremiumTier.Premium || account.tier === PremiumTier.Elite
+  return account.tier === PremiumTier.Premium || account.tier === PremiumTier.Elite || account.tier === PremiumTier.Apex
 }
 
 export function calculateCoinsToUpgrade(currentTier: PremiumTier, targetTier: PremiumTier): number {
-  const tiers = [PremiumTier.Free, PremiumTier.Starter, PremiumTier.Premium, PremiumTier.Elite]
+  const tiers = [PremiumTier.Free, PremiumTier.Starter, PremiumTier.Premium, PremiumTier.Elite, PremiumTier.Apex]
   const currentIdx = tiers.indexOf(currentTier)
   const targetIdx = tiers.indexOf(targetTier)
   if (currentIdx < 0 || targetIdx < 0 || targetIdx <= currentIdx) return 0

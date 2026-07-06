@@ -259,7 +259,7 @@ export default function Page() {
       </section>
 
       <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
-        <p>&copy; OpenStreetMap contributors. Map data is open access under the ODbL.</p>
+        <p>&copy; <a href="https://openstreetmap.org/copyright" className="underline hover:text-slate-700">OpenStreetMap</a> contributors. Map data is open access under the <a href="https://opendatacommons.org/licenses/odbl/" className="underline hover:text-slate-700">ODbL</a>.</p>
         <p className="mt-1">GymMingle — Lifestyle Orchestration Engine.</p>
       </footer>
     </main>

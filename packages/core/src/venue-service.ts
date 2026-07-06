@@ -1,4 +1,4 @@
-import type { LifestyleVenue, LifestyleTag } from './venues'
+import type { LifestyleVenue, LifestyleTag, VenueCategory } from './venues'
 
 export interface LatLng {
   latitude: number
@@ -58,6 +58,44 @@ interface OverpassNode {
   tags?: Record<string, string>
 }
 
+const CATEGORY_MAP: Record<string, VenueCategory> = {
+  gym: 'Fitness',
+  fitness_centre: 'Fitness',
+  sports_centre: 'Fitness',
+  fitness: 'Fitness',
+  yoga: 'Wellness',
+  pilates: 'Wellness',
+  spa: 'Wellness',
+  swimming_pool: 'Fitness',
+  martial_arts: 'Fitness',
+  boxing: 'Fitness',
+  restaurant: 'Dining',
+  dining: 'Dining',
+  cafe: 'Dining',
+  nightclub: 'Nightlife',
+  bar: 'Nightlife',
+  pub: 'Nightlife',
+  strip_club: 'StripClub',
+  stripclub: 'StripClub',
+  adult: 'StripClub',
+  bathhouse: 'Bathhouse',
+  sauna: 'Wellness',
+  park: 'Outdoor',
+  garden: 'Outdoor',
+  nature_reserve: 'Outdoor',
+  hiking: 'Outdoor',
+  museum: 'Arts',
+  art_gallery: 'Arts',
+  gallery: 'Arts',
+  theatre: 'Arts',
+  theater: 'Arts',
+  arts: 'Arts',
+  music_venue: 'Music',
+  concert_hall: 'Music',
+  skate_park: 'Skatepark',
+  skatepark: 'Skatepark',
+}
+
 const LIFESTYLE_TAG_MAP: Record<string, LifestyleTag[]> = {
   gym: ['strength', 'cardio', 'functional'],
   fitness_center: ['strength', 'cardio', 'functional'],
@@ -68,6 +106,18 @@ const LIFESTYLE_TAG_MAP: Record<string, LifestyleTag[]> = {
   pilates: ['wellness', 'functional', 'mindfulness'],
   spa: ['wellness', 'mindfulness'],
   park: ['outdoor', 'cardio', 'social'],
+}
+
+function inferCategory(osmTags: Record<string, string>): VenueCategory {
+  const leisure = osmTags.leisure ?? ''
+  const sport = osmTags.sport ?? ''
+  const amenity = osmTags.amenity ?? ''
+  const tagValues = [leisure, sport, amenity, ...Object.values(osmTags)]
+  for (const val of tagValues) {
+    const mapped = CATEGORY_MAP[val]
+    if (mapped) return mapped
+  }
+  return 'Fitness'
 }
 
 function inferLifestyleTags(osmTags: Record<string, string>): LifestyleTag[] {
@@ -264,6 +314,7 @@ export class VenueService {
       lifestyleTags: inferLifestyleTags(osmTags),
       distance,
       crowdDensity: inferCrowdDensity(),
+      category: inferCategory(osmTags),
     }
   }
 }
