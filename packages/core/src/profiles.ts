@@ -5,6 +5,9 @@ export interface Profile {
   name: string
   bio: string | null
   avatar_url: string | null
+  totalVisits?: number
+  currentStreak?: number
+  lastVenues?: { venueId: string; venueName: string }[]
 }
 
 export interface FetchProfilesOptions {
