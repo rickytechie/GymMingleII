@@ -252,11 +252,16 @@ export default function Page() {
           <div className="mt-10 text-center">
             <p className="text-sm text-white/30">
               <span className="inline-block w-2 h-2 rounded-full bg-electric-lime mr-2" />
-              OpenStreetMap · Leaflet · Coastal Brutalism UI · Glassmorphism
+              Leaflet · OSM · Coastal Brutalism UI · Glassmorphism
             </p>
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
+        <p>&copy; OpenStreetMap contributors. Map data is open access under the ODbL.</p>
+        <p className="mt-1">GymMingle — Lifestyle Orchestration Engine.</p>
+      </footer>
     </main>
   )
 }

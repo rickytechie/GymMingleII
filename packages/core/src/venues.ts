@@ -51,6 +51,11 @@ export const NYC_REGIONS: Record<string, RegionConfig> = {
     center: { latitude: 40.5882, longitude: -73.6679 },
     radius: 3000,
   },
+  huntington: {
+    label: 'Huntington / Greenlawn',
+    center: { latitude: 40.85, longitude: -73.35 },
+    radius: 5000,
+  },
 }
 
 export class LifestyleEngine {
@@ -253,4 +258,12 @@ export const coastalBrutalism = {
   grid: 'grid gap-6 md:grid-cols-2 lg:grid-cols-3',
   vibeDot: (score: number) =>
     score >= 70 ? 'bg-electric-lime' : score >= 40 ? 'bg-sunset-orange' : 'bg-white/30',
+} as const
+
+export const MAP_CONFIG = {
+  tileUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19,
+  defaultZoom: 13,
+  initialCenter: { latitude: 40.85, longitude: -73.35 } as LatLng,
 } as const

@@ -15,6 +15,8 @@ export enum PremiumFeature {
   VerifiedBadge = 'verified_badge',
   LifestyleFilters = 'lifestyle_filters',
   KinkDiscovery = 'kink_discovery',
+  CuratedDateDiscovery = 'curated_date_discovery',
+  VenuePerks = 'venue_perks',
 }
 
 export interface MingleCoinAccount {
@@ -54,6 +56,8 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
     PremiumFeature.VenueInsights,
     PremiumFeature.ReadReceipts,
     PremiumFeature.LifestyleFilters,
+    PremiumFeature.CuratedDateDiscovery,
+    PremiumFeature.VenuePerks,
   ],
   [PremiumTier.Elite]: [
     PremiumFeature.AdvancedChat,
@@ -65,6 +69,8 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
     PremiumFeature.VerifiedBadge,
     PremiumFeature.LifestyleFilters,
     PremiumFeature.KinkDiscovery,
+    PremiumFeature.CuratedDateDiscovery,
+    PremiumFeature.VenuePerks,
   ],
 }
 
@@ -90,6 +96,8 @@ export function getFeatureCost(feature: PremiumFeature): number {
     [PremiumFeature.VerifiedBadge]: 500,
     [PremiumFeature.LifestyleFilters]: 175,
     [PremiumFeature.KinkDiscovery]: 350,
+    [PremiumFeature.CuratedDateDiscovery]: 400,
+    [PremiumFeature.VenuePerks]: 250,
   }
   return costs[feature]
 }
@@ -116,6 +124,18 @@ export function canAccessVenueInsights(account: MingleCoinAccount): boolean {
 
 export function canAccessUnlimitedLikes(account: MingleCoinAccount): boolean {
   return hasFeature(account, PremiumFeature.UnlimitedLikes)
+}
+
+export function canAccessCuratedDateDiscovery(account: MingleCoinAccount): boolean {
+  return hasFeature(account, PremiumFeature.CuratedDateDiscovery)
+}
+
+export function canAccessVenuePerks(account: MingleCoinAccount): boolean {
+  return hasFeature(account, PremiumFeature.VenuePerks)
+}
+
+export function isPremiumStatus(account: MingleCoinAccount): boolean {
+  return account.tier === PremiumTier.Premium || account.tier === PremiumTier.Elite
 }
 
 export function calculateCoinsToUpgrade(currentTier: PremiumTier, targetTier: PremiumTier): number {

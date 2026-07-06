@@ -171,9 +171,21 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
+const REQUEST_TIMEOUT_MS = 15_000
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new VenueServiceError('Request timed out')), ms),
+    ),
+  ])
+}
+
 export class VenueService {
   private readonly overpassUrl: string
   private readonly fetchImpl: typeof fetch
+  private readonly timeoutMs: number
 
   constructor(config: VenueServiceConfig = {}) {
     this.overpassUrl = config.overpassUrl ?? DEFAULT_OVERPASS_URL
@@ -182,6 +194,7 @@ export class VenueService {
       throw new VenueServiceError('No fetch implementation is available in this environment.')
     }
     this.fetchImpl = fetchImpl.bind(globalThis)
+    this.timeoutMs = REQUEST_TIMEOUT_MS
   }
 
   async searchNearby(query: NearbyVenueQuery): Promise<Venue[]> {
@@ -213,11 +226,14 @@ export class VenueService {
   private async queryOverpass<T>(query: string): Promise<T> {
     let response: Response
     try {
-      response = await this.fetchImpl(this.overpassUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ data: query }),
-      })
+      response = await withTimeout(
+        this.fetchImpl(this.overpassUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ data: query }),
+        }),
+        this.timeoutMs,
+      )
     } catch (cause) {
       throw new VenueServiceError(`Failed to reach Overpass API: ${(cause as Error).message}`)
     }
