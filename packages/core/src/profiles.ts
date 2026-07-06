@@ -1,5 +1,7 @@
 import { supabase } from './supabase'
 
+import type { VisitRecord } from './passport'
+
 export interface Profile {
   id: string
   name: string
@@ -8,6 +10,7 @@ export interface Profile {
   totalVisits?: number
   currentStreak?: number
   lastVenues?: { venueId: string; venueName: string }[]
+  visitHistory?: VisitRecord[]
 }
 
 export interface FetchProfilesOptions {

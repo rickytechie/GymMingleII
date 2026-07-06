@@ -5,6 +5,11 @@ interface ProfileCardProps {
   fallbackProvider?: AvatarProvider
 }
 
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
 export function ProfileCard({ profile, fallbackProvider = 'photo' }: ProfileCardProps) {
   const imageUrl = resolveAvatarUrl(profile.avatar_url, {
     seed: profile.id || profile.name,
@@ -28,10 +33,8 @@ export function ProfileCard({ profile, fallbackProvider = 'photo' }: ProfileCard
 
         {profile.totalVisits != null && (
           <div className="mt-4 border-t border-slate-100 pt-3">
-            <div className="flex items-center gap-3 text-xs text-slate-500">
-              <span>
-                <span className="font-semibold text-slate-900">{profile.totalVisits}</span> visits
-              </span>
+            <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
+              <span className="font-semibold text-slate-900">{profile.totalVisits}</span> visits
               {profile.currentStreak != null && profile.currentStreak > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-electric-lime/15 px-2 py-0.5 font-semibold text-slate-900">
                   <span className="h-1.5 w-1.5 rounded-full bg-electric-lime" />
@@ -39,15 +42,19 @@ export function ProfileCard({ profile, fallbackProvider = 'photo' }: ProfileCard
                 </span>
               )}
             </div>
-            {profile.lastVenues && profile.lastVenues.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {profile.lastVenues.map((v) => (
-                  <span
-                    key={v.venueId}
-                    className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] text-slate-600"
+
+            {(profile.visitHistory ?? []).length > 0 && (
+              <div className="grid grid-cols-3 gap-1.5">
+                {(profile.visitHistory ?? []).slice(0, 9).map((v, i) => (
+                  <div
+                    key={`${v.venueId}-${i}`}
+                    className="rounded-lg border border-slate-200 bg-slate-50 p-2 text-center"
                   >
-                    {v.venueName}
-                  </span>
+                    <div className="truncate text-[11px] font-medium text-slate-800">
+                      {v.venueName}
+                    </div>
+                    <div className="mt-0.5 text-[10px] text-slate-500">{formatDate(v.visitedAt)}</div>
+                  </div>
                 ))}
               </div>
             )}

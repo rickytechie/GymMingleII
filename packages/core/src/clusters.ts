@@ -1,47 +1,38 @@
-export interface ClusterMember {
+export interface VenueActivity {
   userId: string
   name: string
+  venueId: string
   avatarUrl: string | null
-  tags: string[]
 }
 
 export interface SocialCluster {
   id: string
-  label: string
-  members: ClusterMember[]
+  venueId: string
+  memberCount: number
+  members: VenueActivity[]
 }
 
-function tagKey(tag: string): string {
-  return tag.toLowerCase().trim()
-}
+export function clusterByVenue(activity: VenueActivity[]): SocialCluster[] {
+  const groups = new Map<string, VenueActivity[]>()
 
-export function clusterMembers(members: ClusterMember[]): SocialCluster[] {
-  const tagIndex = new Map<string, ClusterMember[]>()
-
-  for (const member of members) {
-    const seen = new Set<string>()
-    for (const raw of member.tags) {
-      const key = tagKey(raw)
-      if (!key || seen.has(key)) continue
-      seen.add(key)
-      const group = tagIndex.get(key)
-      if (group) {
-        group.push(member)
-      } else {
-        tagIndex.set(key, [member])
-      }
+  for (const entry of activity) {
+    const group = groups.get(entry.venueId)
+    if (group) {
+      group.push(entry)
+    } else {
+      groups.set(entry.venueId, [entry])
     }
   }
 
   const clusters: SocialCluster[] = []
-  for (const [tag, tagged] of tagIndex) {
-    if (tagged.length < 2) continue
+  for (const [venueId, members] of groups) {
     clusters.push({
-      id: `cluster:${tag}`,
-      label: tag,
-      members: tagged,
+      id: `venue-cluster:${venueId}`,
+      venueId,
+      memberCount: members.length,
+      members,
     })
   }
 
-  return clusters.sort((a, b) => b.members.length - a.members.length)
+  return clusters.sort((a, b) => b.memberCount - a.memberCount)
 }

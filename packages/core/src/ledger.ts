@@ -1,13 +1,11 @@
-export type WorkoutPledgeState = 'pledged' | 'active' | 'completed' | 'missed' | 'cancelled'
+export type WorkoutPledgeState = 'proposed' | 'active' | 'completed'
 
-export type WorkoutPledgeEvent = 'check_in' | 'complete' | 'cancel' | 'expire'
+export type WorkoutPledgeEvent = 'activate' | 'complete'
 
 export const WORKOUT_PLEDGE_TRANSITIONS: Record<WorkoutPledgeState, Partial<Record<WorkoutPledgeEvent, WorkoutPledgeState>>> = {
-  pledged: { check_in: 'active', cancel: 'cancelled', expire: 'missed' },
-  active: { complete: 'completed', expire: 'missed' },
+  proposed: { activate: 'active' },
+  active: { complete: 'completed' },
   completed: {},
-  missed: {},
-  cancelled: {},
 }
 
 export interface WorkoutPledge {
@@ -16,7 +14,7 @@ export interface WorkoutPledge {
   venueId: string
   state: WorkoutPledgeState
   scheduledAt: string
-  checkedInAt: string | null
+  activatedAt: string | null
   completedAt: string | null
   createdAt: string
 }
@@ -36,7 +34,7 @@ export function transitionPledge(pledge: WorkoutPledge, event: WorkoutPledgeEven
   return {
     ...pledge,
     state: nextState,
-    ...(event === 'check_in' ? { checkedInAt: now } : {}),
+    ...(event === 'activate' ? { activatedAt: now } : {}),
     ...(event === 'complete' ? { completedAt: now } : {}),
   }
 }

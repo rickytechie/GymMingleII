@@ -4,7 +4,6 @@ import {
   transitionPledge,
   type WorkoutPledge,
   type WorkoutPledgeEvent,
-  type WorkoutPledgeState,
 } from '@gymmingle/core'
 
 interface State {
@@ -35,20 +34,17 @@ function reducer(state: State, action: Action): State {
 export function useWorkoutPledge(initial: WorkoutPledge) {
   const [{ pledge, error }, dispatch] = useReducer(reducer, { pledge: initial, error: null })
 
-  const checkIn = useCallback(() => dispatch({ type: 'transition', event: 'check_in' }), [])
+  const activate = useCallback(() => dispatch({ type: 'transition', event: 'activate' }), [])
   const complete = useCallback(() => dispatch({ type: 'transition', event: 'complete' }), [])
-  const cancel = useCallback(() => dispatch({ type: 'transition', event: 'cancel' }), [])
   const reset = useCallback((p: WorkoutPledge) => dispatch({ type: 'reset', pledge: p }), [])
 
   return {
     pledge,
-    state: pledge.state as WorkoutPledgeState,
-    canCheckIn: canTransition(pledge.state, 'check_in'),
+    state: pledge.state,
+    canActivate: canTransition(pledge.state, 'activate'),
     canComplete: canTransition(pledge.state, 'complete'),
-    canCancel: canTransition(pledge.state, 'cancel'),
-    checkIn,
+    activate,
     complete,
-    cancel,
     reset,
     error,
   }

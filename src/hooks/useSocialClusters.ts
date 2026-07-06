@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import {
-  clusterMembers,
-  type ClusterMember,
+  clusterByVenue,
+  type VenueActivity,
   type SocialCluster,
 } from '@gymmingle/core'
 
-export function useSocialClusters(members: ClusterMember[]) {
+export function useSocialClusters(activity: VenueActivity[]) {
   return useMemo<SocialCluster[]>(() => {
-    if (members.length < 2) return []
-    return clusterMembers(members)
-  }, [members])
+    if (activity.length < 2) return []
+    return clusterByVenue(activity)
+  }, [activity])
 }
