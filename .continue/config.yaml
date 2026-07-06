@@ -1,0 +1,12 @@
+version: 1.0.0
+models:
+  - name: Local Chat
+    provider: ollama
+    model: qwen2.5-coder:14b
+    apiBase: http://127.0.0.1:11434
+    roles: [chat]
+  - name: Local Autocomplete
+    provider: ollama
+    model: qwen2.5-coder:1.5b
+    apiBase: http://127.0.0.1:11434
+    roles: [autocomplete]
