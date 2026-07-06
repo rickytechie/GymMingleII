@@ -43,22 +43,34 @@ const steps = [
 
 const tiers = [
   {
+    name: 'Free',
+    coins: '0 / month',
+    features: ['Social feed'],
+    color: 'bg-slate-100 text-slate-400',
+  },
+  {
     name: 'Starter',
     coins: '500 / month',
-    features: ['Advanced chat', 'Venue insights'],
+    features: ['Advanced chat', 'Venue insights', 'Expanded history', 'Basic templates'],
     color: 'bg-slate-200 text-slate-700',
   },
   {
-    name: 'Premium',
+    name: 'Premium (Momentum)',
     coins: '1,500 / month',
-    features: ['Advanced chat', 'Unlimited likes', 'Venue insights', 'Read receipts', 'Lifestyle filters'],
+    features: ['Advanced chat', 'Unlimited likes', 'Venue insights', 'Read receipts', 'Lifestyle filters', 'Analytics', 'Exclusive local events'],
     color: 'bg-[#CCFF00] text-slate-900',
   },
   {
-    name: 'Elite',
+    name: 'Elite (Peak)',
     coins: '3,500 / month',
-    features: ['Advanced chat', 'Unlimited likes', 'Venue insights', 'Read receipts', 'Priority matching', 'Incognito mode', 'Verified badge', 'Lifestyle filters', 'Kink discovery'],
+    features: ['Advanced chat', 'Unlimited likes', 'Venue insights', 'Read receipts', 'Priority matching', 'Incognito mode', 'Verified badge', 'Lifestyle filters', 'Kink discovery', 'Partner gym access', 'Priority support', 'High coin earning'],
     color: 'bg-slate-900 text-[#CCFF00]',
+  },
+  {
+    name: 'Apex (VIP)',
+    coins: '7,500 / month',
+    features: ['Concierge booking', '1-on-1 coaching', 'VIP venue entry', 'All Elite features'],
+    color: 'bg-purple-900 text-[#CCFF00]',
   },
 ]
 

@@ -1,9 +1,9 @@
 export enum PremiumTier {
-  Free = 'free',
-  Starter = 'starter',
-  Premium = 'premium',
-  Elite = 'elite',
-  Apex = 'apex',
+  FREE = 'free',
+  STARTER = 'starter',
+  PREMIUM_MOMENTUM = 'premium_momentum',
+  ELITE_PEAK = 'elite_peak',
+  APEX_VIP = 'apex_vip',
 }
 
 export enum PremiumFeature {
@@ -56,14 +56,14 @@ export interface CoinTransaction {
 }
 
 const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
-  [PremiumTier.Free]: [],
-  [PremiumTier.Starter]: [
+  [PremiumTier.FREE]: [],
+  [PremiumTier.STARTER]: [
     PremiumFeature.AdvancedChat,
     PremiumFeature.VenueInsights,
     PremiumFeature.ExpandedHistory,
     PremiumFeature.BasicTemplates,
   ],
-  [PremiumTier.Premium]: [
+  [PremiumTier.PREMIUM_MOMENTUM]: [
     PremiumFeature.AdvancedChat,
     PremiumFeature.UnlimitedLikes,
     PremiumFeature.VenueInsights,
@@ -76,7 +76,7 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
     PremiumFeature.Analytics,
     PremiumFeature.ExclusiveLocalEvents,
   ],
-  [PremiumTier.Elite]: [
+  [PremiumTier.ELITE_PEAK]: [
     PremiumFeature.AdvancedChat,
     PremiumFeature.UnlimitedLikes,
     PremiumFeature.VenueInsights,
@@ -96,7 +96,7 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
     PremiumFeature.PrioritySupport,
     PremiumFeature.HighCoinEarning,
   ],
-  [PremiumTier.Apex]: [
+  [PremiumTier.APEX_VIP]: [
     PremiumFeature.AdvancedChat,
     PremiumFeature.UnlimitedLikes,
     PremiumFeature.VenueInsights,
@@ -122,11 +122,11 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
 }
 
 const TIER_MONTHLY_COST = {
-  [PremiumTier.Free]: 0,
-  [PremiumTier.Starter]: 500,
-  [PremiumTier.Premium]: 1500,
-  [PremiumTier.Elite]: 3500,
-  [PremiumTier.Apex]: 7500,
+  [PremiumTier.FREE]: 0,
+  [PremiumTier.STARTER]: 500,
+  [PremiumTier.PREMIUM_MOMENTUM]: 1500,
+  [PremiumTier.ELITE_PEAK]: 3500,
+  [PremiumTier.APEX_VIP]: 7500,
 }
 
 export function getTierFeatures(tier: PremiumTier): PremiumFeature[] {
@@ -193,11 +193,11 @@ export function canAccessVenuePerks(account: MingleCoinAccount): boolean {
 }
 
 export function isPremiumStatus(account: MingleCoinAccount): boolean {
-  return account.tier === PremiumTier.Premium || account.tier === PremiumTier.Elite || account.tier === PremiumTier.Apex
+  return account.tier === PremiumTier.PREMIUM_MOMENTUM || account.tier === PremiumTier.ELITE_PEAK || account.tier === PremiumTier.APEX_VIP
 }
 
 export function calculateCoinsToUpgrade(currentTier: PremiumTier, targetTier: PremiumTier): number {
-  const tiers = [PremiumTier.Free, PremiumTier.Starter, PremiumTier.Premium, PremiumTier.Elite, PremiumTier.Apex]
+  const tiers = [PremiumTier.FREE, PremiumTier.STARTER, PremiumTier.PREMIUM_MOMENTUM, PremiumTier.ELITE_PEAK, PremiumTier.APEX_VIP]
   const currentIdx = tiers.indexOf(currentTier)
   const targetIdx = tiers.indexOf(targetTier)
   if (currentIdx < 0 || targetIdx < 0 || targetIdx <= currentIdx) return 0
@@ -214,7 +214,7 @@ export function createFreeAccount(): MingleCoinAccount {
     balance: 50,
     lifetimeEarned: 50,
     lifetimeSpent: 0,
-    tier: PremiumTier.Free,
+    tier: PremiumTier.FREE,
     tierExpiresAt: null,
     unlockedFeatures: [],
   }

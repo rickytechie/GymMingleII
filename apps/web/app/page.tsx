@@ -102,7 +102,7 @@ export default function Page() {
               Unlock with MingleCoins
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {[PremiumTier.Starter, PremiumTier.Premium, PremiumTier.Elite].map((tier) => (
+              {[PremiumTier.STARTER, PremiumTier.PREMIUM_MOMENTUM, PremiumTier.ELITE_PEAK, PremiumTier.APEX_VIP].map((tier) => (
                 <span
                   key={tier}
                   className="rounded-full border border-slate-200 bg-white/60 px-3 py-1 text-xs font-bold uppercase tracking-wide text-slate-700"
@@ -148,11 +148,13 @@ export default function Page() {
               <div key={p.id} className="flex items-center gap-2 text-sm">
                 <span className="font-semibold text-slate-900">{p.name}</span>
                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                  p.mingleCoins.tier === PremiumTier.Elite
+                  p.mingleCoins.tier === PremiumTier.APEX_VIP
+                    ? 'bg-purple-900 text-[#CCFF00]'
+                    : p.mingleCoins.tier === PremiumTier.ELITE_PEAK
                     ? 'bg-slate-900 text-[#CCFF00]'
-                    : p.mingleCoins.tier === PremiumTier.Premium
+                    : p.mingleCoins.tier === PremiumTier.PREMIUM_MOMENTUM
                     ? 'bg-[#CCFF00] text-slate-900'
-                    : p.mingleCoins.tier === PremiumTier.Starter
+                    : p.mingleCoins.tier === PremiumTier.STARTER
                     ? 'bg-slate-200 text-slate-700'
                     : 'bg-slate-100 text-slate-400'
                 }`}>
