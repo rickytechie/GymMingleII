@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import LandingHeader from '../../src/components/LandingHeader'
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const metadata: Metadata = {
@@ -15,12 +14,12 @@ const pillars = [
     body: 'Shared matching logic in @gymmingle/core pairs members by sport, intensity, and schedule — the same engine powers web and mobile.',
   },
   {
-    title: 'Discover venues that fit',
-    body: 'Our venue service taps the Google Places API to surface gyms, studios, and courts near you, complete with ratings and photos.',
+    title: 'Lifestyle Orchestration Engine',
+    body: 'Discover NYC & Nassau venues curated by lifestyle tags and vibe scores. Powered by the Google Places API with Coastal Brutalist presentation.',
   },
   {
-    title: 'One brand, every surface',
-    body: 'A single design language and theme contract keeps the experience consistent from the landing page to the mobile app.',
+    title: 'MingleCoin Premium Economy',
+    body: 'Earn and spend MingleCoins to unlock premium features. Gate advanced chat, kink discovery, incognito mode, and venue insights behind tiered subscriptions.',
   },
 ]
 
@@ -28,35 +27,65 @@ const steps = [
   {
     step: '01',
     title: 'Create your athlete profile',
-    body: 'Tell us your sports, goals, and availability. Realistic imagery keeps profiles feeling human from day one.',
+    body: 'Tell us your sports, goals, and availability. Premium profiles earn MingleCoins for completion.',
   },
   {
     step: '02',
-    title: 'Get matched',
-    body: 'The core matching engine ranks compatible partners so you spend less time swiping and more time training.',
+    title: 'Discover your vibe venues',
+    body: 'Browse lifestyle-tagged venues across Manhattan, Brooklyn, and Nassau County. Filter by intensity, energy, and community.',
   },
   {
     step: '03',
-    title: 'Meet at the right venue',
-    body: 'Pick a nearby, highly-rated venue surfaced by the venue service and lock in your session.',
+    title: 'Connect with intention',
+    body: 'Premium chat, lifestyle filters, and kink-aware discovery ensure every connection has the right context from message one.',
+  },
+]
+
+const tiers = [
+  {
+    name: 'Starter',
+    coins: '500 / month',
+    features: ['Advanced chat', 'Venue insights'],
+    color: 'bg-slate-200 text-slate-700',
+  },
+  {
+    name: 'Premium',
+    coins: '1,500 / month',
+    features: ['Advanced chat', 'Unlimited likes', 'Venue insights', 'Read receipts', 'Lifestyle filters'],
+    color: 'bg-[#CCFF00] text-slate-900',
+  },
+  {
+    name: 'Elite',
+    coins: '3,500 / month',
+    features: ['Advanced chat', 'Unlimited likes', 'Venue insights', 'Read receipts', 'Priority matching', 'Incognito mode', 'Verified badge', 'Lifestyle filters', 'Kink discovery'],
+    color: 'bg-slate-900 text-[#CCFF00]',
   },
 ]
 
 export default function ConceptPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      <LandingHeader />
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5 sm:px-8">
+        <Link href="/" className="text-xl font-black tracking-tight text-slate-900">
+          GymMingle
+        </Link>
+        <nav className="flex gap-4">
+          <Link href="/" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+            Home
+          </Link>
+        </nav>
+      </header>
 
       <section className="mx-auto max-w-5xl px-6 py-20 text-center sm:px-8">
         <span className="inline-flex rounded-full border border-[#CCFF00] bg-[#CCFF00]/15 px-3 py-1 text-sm font-semibold text-slate-800">
           The concept
         </span>
         <h1 className="mt-6 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
-          Where fitness, wellness, and connection converge.
+          Where fitness, lifestyle, and connection converge.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">
           Curated matching that pairs you with people who align with your lifestyle, energy, and
-          intentions — a high-intent ecosystem built around who you are, not just where you train.
+          intentions — powered by the Lifestyle Orchestration Engine and MingleCoin economy.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
           <a
@@ -96,6 +125,35 @@ export default function ConceptPage() {
               <p className="text-4xl font-black text-[#FF6B35]">{item.step}</p>
               <h3 className="mt-4 text-lg font-semibold text-slate-900">{item.title}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">{item.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* MINGLECOIN TIERS */}
+      <section className="mx-auto max-w-6xl px-6 pb-16 sm:px-8">
+        <div className="mb-8">
+          <span className="inline-flex rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-bold uppercase tracking-wider text-slate-600">
+            MingleCoin Premium Economy
+          </span>
+          <h2 className="mt-4 text-2xl font-semibold text-slate-900">Choose your tier</h2>
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {tiers.map((tier) => (
+            <div key={tier.name} className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+              <h3 className={`inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${tier.color}`}>
+                {tier.name}
+              </h3>
+              <p className="mt-4 text-3xl font-black text-slate-900">{tier.coins}</p>
+              <p className="mt-1 text-xs text-slate-500">MingleCoins per month</p>
+              <ul className="mt-6 space-y-2">
+                {tier.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-slate-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#CCFF00]" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
