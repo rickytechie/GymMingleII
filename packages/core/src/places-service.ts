@@ -1,4 +1,5 @@
-import type { Venue, LatLng, VenueCategory } from './venue-service'
+import type { VenueCategory } from './venues'
+import type { Venue, LatLng } from './venue-service'
 
 export interface PlacesServiceConfig {
   apiKey?: string

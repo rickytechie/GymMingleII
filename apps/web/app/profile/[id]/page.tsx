@@ -1,7 +1,7 @@
+/* eslint-disable react-refresh/only-export-components */
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { COMMUNITY_PROFILES } from '@gymmingle/core'
-import type { CommunityProfile } from '@gymmingle/core'
 
 export const dynamic = 'force-static'
 export const dynamicParams = false
@@ -18,8 +18,9 @@ const TIER_BG: Record<string, string> = {
   Apex: 'bg-purple-900 text-[#CCFF00]',
 }
 
-export default function ProfilePage({ params }: { params: { id: string } }) {
-  const profile = COMMUNITY_PROFILES.find((p) => p.id === params.id)
+export default async function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const profile = COMMUNITY_PROFILES.find((p) => p.id === id)
   if (!profile) notFound()
 
   const tier = profile.mingleCoins.tier
