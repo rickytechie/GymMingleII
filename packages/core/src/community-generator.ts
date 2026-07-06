@@ -121,6 +121,33 @@ const KINK_PREFS = [
 
 const CITY_KEYS = Object.keys(CITY_REGIONS)
 
+export const CITY_WEIGHTS: Record<string, number> = {
+  // Tier 1 — Mega metros
+  nyc: 50, la: 30, chicago: 25,
+  // Tier 2 — Major metros
+  houston: 20, dallas: 20, phoenix: 18, philadelphia: 18, atlanta: 18,
+  san_antonio: 16, san_diego: 16, boston: 16, miami: 16,
+  austin: 14, san_jose: 14, seattle: 14, denver: 14, las_vegas: 14,
+  washington_dc: 18, pittsburgh: 10,
+  // Tier 3 — Mid-sized
+  jacksonville: 12, indianapolis: 12, nashville: 12, portland: 12,
+  charlotte: 12, detroit: 12, minneapolis: 12, tampa: 12,
+  orlando: 12, sacramento: 12, columbus: 12, raleigh: 12,
+  // Tier 4 — Smaller metros
+  baltimore: 10, el_paso: 10, st_louis: 10, cincinnati: 10,
+  cleveland: 10, kansas_city: 10, milwaukee: 10, new_orleans: 10,
+  virginia_beach: 10, buffalo: 8, tucson: 8, albuquerque: 8, richmond: 8,
+  // Tier 5 — Small cities / suburbs
+  rochester: 6, syracuse: 6, albany: 6, grand_rapids: 6,
+  glen_cove: 3, new_rochelle: 3, sea_cliff: 2, amherst: 2,
+}
+
+const WEIGHTED_CITIES: string[] = []
+for (const city of CITY_KEYS) {
+  const w = CITY_WEIGHTS[city] ?? 5
+  for (let i = 0; i < w; i++) WEIGHTED_CITIES.push(city)
+}
+
 function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)]
 }
@@ -129,13 +156,16 @@ function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
+function weightedCity(): string {
+  return pick(WEIGHTED_CITIES)
+}
+
 function generateProfile(
   id: string,
   name: string,
   female: boolean,
-  idx: number,
 ): CommunityProfile {
-  const city = CITY_KEYS[idx % CITY_KEYS.length]
+  const city = weightedCity()
   const tiers = [PremiumTier.FREE, PremiumTier.FREE, PremiumTier.FREE, PremiumTier.STARTER, PremiumTier.STARTER, PremiumTier.MOMENTUM, PremiumTier.PEAK, PremiumTier.APEX]
   const tier = pick(tiers)
   const base = createFreeAccount()
@@ -205,20 +235,19 @@ const FEMALE_COUNT = 500
 
 export const COMMUNITY_PROFILES: CommunityProfile[] = (() => {
   const profiles: CommunityProfile[] = []
-  let idx = 0
 
   for (let i = 0; i < FEMALE_COUNT; i++) {
     const name = pick(FEMALE_NAMES)
-    if (profiles.some((p) => p.name === name && p.city === CITY_KEYS[idx % CITY_KEYS.length])) continue
-    profiles.push(generateProfile(`comm_f_${i}`, name, true, idx))
-    idx++
+    const city = weightedCity()
+    if (profiles.some((p) => p.name === name && p.city === city)) continue
+    profiles.push(generateProfile(`comm_f_${i}`, name, true))
   }
 
   for (let i = 0; i < MALE_COUNT; i++) {
     const name = pick(MALE_NAMES)
-    if (profiles.some((p) => p.name === name && p.city === CITY_KEYS[idx % CITY_KEYS.length])) continue
-    profiles.push(generateProfile(`comm_m_${i}`, name, false, idx))
-    idx++
+    const city = weightedCity()
+    if (profiles.some((p) => p.name === name && p.city === city)) continue
+    profiles.push(generateProfile(`comm_m_${i}`, name, false))
   }
 
   return profiles

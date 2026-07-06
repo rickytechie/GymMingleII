@@ -48,7 +48,44 @@ export class VenueServiceError extends Error {
 const DEFAULT_OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 const DEFAULT_RADIUS_METERS = 5000
 const DEFAULT_MAX_RESULTS = 20
+const DEFAULT_ANCHOR_RADIUS_METERS = 2000
+const DEFAULT_MAX_ANCHORED_RESULTS = 100
 const DEFAULT_GYM_TYPES = ['gym', 'fitness_center']
+
+export interface ZipAnchor {
+  zip: string
+  location: LatLng
+  label: string
+}
+
+export const SEARCH_ANCHORS: ZipAnchor[] = [
+  // -- NYC Boroughs --
+  { zip: '11201', location: { latitude: 40.6937, longitude: -73.9904 }, label: 'Brooklyn Heights' },
+  { zip: '11222', location: { latitude: 40.7306, longitude: -73.9539 }, label: 'Greenpoint' },
+  { zip: '11249', location: { latitude: 40.7130, longitude: -73.9616 }, label: 'Williamsburg' },
+  { zip: '10007', location: { latitude: 40.7130, longitude: -74.0087 }, label: 'Financial District' },
+  { zip: '10013', location: { latitude: 40.7210, longitude: -74.0050 }, label: 'Tribeca' },
+  { zip: '10014', location: { latitude: 40.7340, longitude: -74.0050 }, label: 'West Village' },
+  { zip: '10028', location: { latitude: 40.7769, longitude: -73.9553 }, label: 'Upper East Side' },
+  { zip: '10021', location: { latitude: 40.7702, longitude: -73.9589 }, label: 'Upper East Side' },
+  { zip: '10065', location: { latitude: 40.7645, longitude: -73.9629 }, label: 'Upper East Side' },
+  { zip: '11101', location: { latitude: 40.7456, longitude: -73.9445 }, label: 'Long Island City' },
+  { zip: '11109', location: { latitude: 40.7460, longitude: -73.9430 }, label: 'Long Island City' },
+  // -- Queens --
+  { zip: '11354', location: { latitude: 40.7689, longitude: -73.8247 }, label: 'Flushing' },
+  { zip: '11363', location: { latitude: 40.7734, longitude: -73.7375 }, label: 'Little Neck' },
+  // -- Nassau County (LI) --
+  { zip: '11542', location: { latitude: 40.8656, longitude: -73.6337 }, label: 'Glen Cove' },
+  { zip: '11579', location: { latitude: 40.8489, longitude: -73.6447 }, label: 'Sea Cliff' },
+  { zip: '11530', location: { latitude: 40.7269, longitude: -73.6349 }, label: 'Garden City' },
+  { zip: '11030', location: { latitude: 40.7946, longitude: -73.6768 }, label: 'Manhasset' },
+  // -- Suffolk County (LI) --
+  { zip: '11746', location: { latitude: 40.8260, longitude: -73.3959 }, label: 'Huntington Station' },
+  { zip: '11791', location: { latitude: 40.8203, longitude: -73.5072 }, label: 'Syosset' },
+  // -- Westchester --
+  { zip: '10583', location: { latitude: 40.9895, longitude: -73.7854 }, label: 'Scarsdale' },
+  { zip: '10804', location: { latitude: 40.9170, longitude: -73.7824 }, label: 'New Rochelle' },
+]
 
 interface OverpassNode {
   type: string
@@ -253,6 +290,39 @@ export class VenueService {
     const overpassQuery = buildOverpassQuery(query.center, radius, types)
     const data = await this.queryOverpass<{ elements?: OverpassNode[] }>(overpassQuery)
     return (data.elements ?? []).map(normalizeNode).filter((v): v is Venue => v !== null)
+  }
+
+  async searchAnchored(
+    query: Omit<NearbyVenueQuery, 'center'> & { anchors?: ZipAnchor[] },
+  ): Promise<Venue[]> {
+    const anchors = query.anchors ?? SEARCH_ANCHORS
+    const types = query.includedTypes ?? DEFAULT_GYM_TYPES
+    const radius = clamp(query.radiusMeters ?? DEFAULT_ANCHOR_RADIUS_METERS, 1, 5000)
+    const seen = new Set<string>()
+    const all: Venue[] = []
+
+    for (const anchor of anchors) {
+      if (all.length >= DEFAULT_MAX_ANCHORED_RESULTS) break
+      try {
+        const results = await this.searchNearby({
+          center: anchor.location,
+          radiusMeters: radius,
+          includedTypes: types,
+          maxResults: 20,
+        })
+        for (const v of results) {
+          const key = `${v.name}|${v.location?.latitude.toFixed(4)}|${v.location?.longitude.toFixed(4)}`
+          if (!seen.has(key)) {
+            seen.add(key)
+            all.push(v)
+          }
+        }
+      } catch {
+        // skip failed anchors
+      }
+    }
+
+    return all.slice(0, DEFAULT_MAX_ANCHORED_RESULTS)
   }
 
   async searchText(query: TextVenueQuery): Promise<Venue[]> {
