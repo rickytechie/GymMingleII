@@ -2,21 +2,28 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import LandingHeader from '../src/components/LandingHeader'
 import WaitlistForm from '../src/components/WaitlistForm'
 import ProfileCard from '../src/components/ProfileCard'
-import { fetchProfiles, getDemoProfiles, coastalBrutalism, NYC_REGIONS, PremiumTier } from '@gymmingle/core'
+import { fetchProfiles, getDemoProfiles, coastalBrutalism, NYC_REGIONS, PremiumTier, LifestyleEngine } from '@gymmingle/core'
 import type { Profile, LifestyleVenue } from '@gymmingle/core'
+
+const VenueMap = dynamic(() => import('../src/components/VenueMap'), { ssr: false })
+
+const engine = new LifestyleEngine()
 
 export default function Page() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [activeVenueTab, setActiveVenueTab] = useState('manhattan')
+  const [venues, setVenues] = useState<LifestyleVenue[]>([])
+  const [venuesLoading, setVenuesLoading] = useState(true)
 
   const demoProfiles = getDemoProfiles()
   const regions = Object.entries(NYC_REGIONS)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     let active = true
 
@@ -25,10 +32,7 @@ export default function Page() {
         if (active) setProfiles(data)
       })
       .catch(() => {
-        if (active) {
-          setProfiles(demoProfiles)
-          setError(null)
-        }
+        if (active) setProfiles(demoProfiles)
       })
       .finally(() => {
         if (active) setIsLoading(false)
@@ -36,6 +40,21 @@ export default function Page() {
 
     return () => { active = false }
   }, [])
+
+  useEffect(() => {
+    let active = true
+    const region = NYC_REGIONS[activeVenueTab]
+    if (region) {
+      engine.discoverVenues(region).then((results) => {
+        if (active) setVenues(results)
+      }).catch(() => {
+        if (active) setVenues([])
+      }).finally(() => {
+        if (active) setVenuesLoading(false)
+      })
+    }
+    return () => { active = false }
+  }, [activeVenueTab])
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -159,7 +178,7 @@ export default function Page() {
               Discover venues that match your vibe
             </h2>
             <p className="mt-3 max-w-xl text-white/60">
-              Powered by Google Maps Places API — NYC and Nassau venues curated by lifestyle, intensity, and energy.
+              Powered by OpenStreetMap + Leaflet — no API key required, always free.
             </p>
           </div>
 
@@ -168,7 +187,10 @@ export default function Page() {
             {regions.map(([key, region]) => (
               <button
                 key={key}
-                onClick={() => setActiveVenueTab(key)}
+                onClick={() => {
+                  setVenuesLoading(true)
+                  setActiveVenueTab(key)
+                }}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
                   activeVenueTab === key
                     ? 'bg-electric-lime text-slate-950'
@@ -180,63 +202,57 @@ export default function Page() {
             ))}
           </div>
 
-          {/* VENUE GRID */}
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {demoProfiles.map((profile, idx) => (
-              <div key={profile.id} className="glass-card p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-white/40">
-                      Match Suggestion
-                    </p>
-                    <h3 className="mt-1 text-lg font-bold text-white">{profile.name}</h3>
-                    <p className="text-sm text-white/50">{profile.fitnessStyle}</p>
-                  </div>
-                  <div className={`h-8 w-8 rounded-full ${
-                    profile.mingleCoins.tier === PremiumTier.Elite
-                      ? 'bg-electric-lime'
-                      : profile.mingleCoins.tier === PremiumTier.Premium
-                      ? 'bg-sunset-orange'
-                      : 'bg-white/20'
-                  } flex items-center justify-center text-[10px] font-black text-slate-950`}>
-                    {profile.mingleCoins.balance}
-                  </div>
-                </div>
+          {/* MAP + VENUE LIST */}
+          <div className="flex flex-col gap-8 lg:flex-row">
+            <div className="h-[400px] w-full overflow-hidden rounded-2xl border border-white/10 lg:h-[600px] lg:w-3/5">
+              <VenueMap venues={venues} region={NYC_REGIONS[activeVenueTab]} />
+            </div>
 
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {profile.interests.slice(0, 4).map((interest) => (
-                    <span key={interest} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[11px] text-white/60">
-                      {interest}
-                    </span>
-                  ))}
+            <div className="flex-1 space-y-4">
+              {venuesLoading ? (
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-sm text-white/40">Loading venues from OpenStreetMap…</p>
                 </div>
-
-                <div className="mt-4 border-t border-white/5 pt-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-white/40">Vibe match</span>
-                    <span className="font-bold text-electric-lime">{85 - idx * 12}%</span>
+              ) : venues.length === 0 ? (
+                <div className="flex h-full items-center justify-center">
+                  <p className="text-sm text-white/30">No venues found in this area.</p>
+                </div>
+              ) : (
+                venues.slice(0, 6).map((venue) => (
+                  <div key={venue.id} className="glass-card flex items-start gap-4 p-4">
+                    <div className={`mt-1 h-3 w-3 flex-shrink-0 rounded-full ${
+                      venue.vibeScore >= 70 ? 'bg-electric-lime' : venue.vibeScore >= 40 ? 'bg-sunset-orange' : 'bg-white/30'
+                    }`} />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-bold text-white">{venue.name}</h3>
+                      {venue.address && (
+                        <p className="mt-0.5 truncate text-xs text-white/40">{venue.address}</p>
+                      )}
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {venue.lifestyleTags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/50">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-2 flex items-center gap-3 text-xs text-white/40">
+                        <span className="font-bold text-electric-lime">Vibe {venue.vibeScore}</span>
+                        {venue.distance != null && (
+                          <span>{(venue.distance / 1000).toFixed(1)} km</span>
+                        )}
+                        <span className="capitalize">{venue.crowdDensity}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-1.5 h-1.5 w-full rounded-full bg-white/10">
-                    <div
-                      className="h-1.5 rounded-full bg-electric-lime transition-all"
-                      style={{ width: `${85 - idx * 12}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center gap-2 text-xs text-white/40">
-                  <span className="font-medium text-white/70">{activeVenueTab === 'nassau' ? 'Nassau County' : NYC_REGIONS[activeVenueTab]?.label}</span>
-                  <span>·</span>
-                  <span>{profile.lookingFor[0]}</span>
-                </div>
-              </div>
-            ))}
+                ))
+              )}
+            </div>
           </div>
 
           <div className="mt-10 text-center">
             <p className="text-sm text-white/30">
               <span className="inline-block w-2 h-2 rounded-full bg-electric-lime mr-2" />
-              Live Google Places API · Coastal Brutalism UI · Glassmorphism
+              OpenStreetMap · Leaflet · Coastal Brutalism UI · Glassmorphism
             </p>
           </div>
         </div>

@@ -15,7 +15,7 @@ const pillars = [
   },
   {
     title: 'Lifestyle Orchestration Engine',
-    body: 'Discover NYC & Nassau venues curated by lifestyle tags and vibe scores. Powered by the Google Places API with Coastal Brutalist presentation.',
+    body: 'Discover NYC & Nassau venues curated by lifestyle tags and vibe scores. Powered by OpenStreetMap + Leaflet with Coastal Brutalist presentation.',
   },
   {
     title: 'MingleCoin Premium Economy',

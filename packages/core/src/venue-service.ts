@@ -1,19 +1,10 @@
-/**
- * Venue service — a thin, typed wrapper around the Google Places API (New, v1).
- *
- * All GymMingle venue discovery logic lives here so both the web and mobile
- * apps can share a single, well-typed contract. The service is transport-only:
- * it performs no rendering and holds no framework dependencies.
- *
- * Docs: https://developers.google.com/maps/documentation/places/web-service
- */
+import type { LifestyleVenue, LifestyleTag } from './venues'
 
 export interface LatLng {
   latitude: number
   longitude: number
 }
 
-/** A normalized venue as consumed by GymMingle features. */
 export interface Venue {
   id: string
   name: string
@@ -21,19 +12,14 @@ export interface Venue {
   location: LatLng | null
   rating: number | null
   userRatingCount: number | null
-  /** Ready-to-render photo references (resolve to URLs via {@link VenueService.getPhotoUrl}). */
   photoNames: string[]
-  /** Raw Google "types" (e.g. "gym", "fitness_center"). */
   types: string[]
 }
 
 export interface NearbyVenueQuery {
   center: LatLng
-  /** Search radius in meters (1–50000). Defaults to 5000. */
   radiusMeters?: number
-  /** Google place types to include, e.g. ["gym", "fitness_center"]. */
   includedTypes?: string[]
-  /** Maximum results to return (1–20). Defaults to 20. */
   maxResults?: number
 }
 
@@ -45,10 +31,7 @@ export interface TextVenueQuery {
 }
 
 export interface VenueServiceConfig {
-  apiKey: string
-  /** Override for testing or regional endpoints. */
-  baseUrl?: string
-  /** Injectable fetch implementation (defaults to global `fetch`). */
+  overpassUrl?: string
   fetchImpl?: typeof fetch
 }
 
@@ -62,71 +45,138 @@ export class VenueServiceError extends Error {
   }
 }
 
-const DEFAULT_BASE_URL = 'https://places.googleapis.com/v1'
+const DEFAULT_OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 const DEFAULT_RADIUS_METERS = 5000
 const DEFAULT_MAX_RESULTS = 20
 const DEFAULT_GYM_TYPES = ['gym', 'fitness_center']
 
-/** Field mask requested from the Places API — keeps payloads small and typed. */
-const VENUE_FIELD_MASK = [
-  'places.id',
-  'places.displayName',
-  'places.formattedAddress',
-  'places.location',
-  'places.rating',
-  'places.userRatingCount',
-  'places.photos',
-  'places.types',
-].join(',')
+interface OverpassNode {
+  type: string
+  id: number
+  lat?: number
+  lon?: number
+  tags?: Record<string, string>
+}
 
-interface RawPlace {
-  id?: string
-  displayName?: { text?: string }
-  formattedAddress?: string
-  location?: { latitude?: number; longitude?: number }
-  rating?: number
-  userRatingCount?: number
-  photos?: { name?: string }[]
-  types?: string[]
+const LIFESTYLE_TAG_MAP: Record<string, LifestyleTag[]> = {
+  gym: ['strength', 'cardio', 'functional'],
+  fitness_center: ['strength', 'cardio', 'functional'],
+  yoga: ['yoga', 'mindfulness', 'wellness'],
+  martial_arts: ['martial-arts', 'combat-sports', 'functional'],
+  boxing: ['martial-arts', 'combat-sports', 'cardio'],
+  swimming: ['swimming', 'cardio', 'outdoor'],
+  pilates: ['wellness', 'functional', 'mindfulness'],
+  spa: ['wellness', 'mindfulness'],
+  park: ['outdoor', 'cardio', 'social'],
+}
+
+function inferLifestyleTags(osmTags: Record<string, string>): LifestyleTag[] {
+  const tags = new Set<LifestyleTag>()
+  const leisure = osmTags.leisure ?? ''
+  const sport = osmTags.sport ?? ''
+  for (const [key, mapped] of Object.entries(LIFESTYLE_TAG_MAP)) {
+    if (leisure.includes(key) || sport.includes(key)) {
+      mapped.forEach((tag) => tags.add(tag))
+    }
+  }
+  if (tags.size === 0) tags.add('functional')
+  return Array.from(tags)
+}
+
+function computeVibeScore(rating: number | null, userCount: number | null): number {
+  if (rating == null) return 50
+  const score = Math.round((rating / 5) * 60 + Math.min((userCount ?? 0) / 50, 40))
+  return Math.min(Math.max(score, 0), 100)
+}
+
+function inferCrowdDensity(): 'low' | 'moderate' | 'busy' | 'packed' {
+  const hour = new Date().getHours()
+  if (hour < 6 || hour > 22) return 'low'
+  if (hour < 9) return 'busy'
+  if (hour < 12) return 'moderate'
+  if (hour < 15) return 'low'
+  if (hour < 19) return 'busy'
+  return 'moderate'
+}
+
+function haversineMeters(a: LatLng, b: LatLng): number {
+  const R = 6371000
+  const dLat = toRad(b.latitude - a.latitude)
+  const dLng = toRad(b.longitude - a.longitude)
+  const sinDLat = Math.sin(dLat / 2)
+  const sinDLng = Math.sin(dLng / 2)
+  const aVal =
+    sinDLat * sinDLat +
+    Math.cos(toRad(a.latitude)) * Math.cos(toRad(b.latitude)) * sinDLng * sinDLng
+  return R * 2 * Math.atan2(Math.sqrt(aVal), Math.sqrt(1 - aVal))
+}
+
+function toRad(deg: number): number {
+  return (deg * Math.PI) / 180
+}
+
+function normalizeNode(node: OverpassNode): Venue | null {
+  if (node.lat == null || node.lon == null || !node.tags) return null
+
+  const name = node.tags.name ?? node.tags.brand ?? 'Unnamed venue'
+  const streetPart = [
+    node.tags['addr:housenumber'] ?? '',
+    node.tags['addr:street'] ?? '',
+  ].filter(Boolean).join(' ')
+  const address = streetPart || (node.tags['addr:city'] ?? null)
+
+  return {
+    id: `osm_${node.id}`,
+    name,
+    address: address || null,
+    location: { latitude: node.lat, longitude: node.lon },
+    rating: node.tags.rating ? parseFloat(node.tags.rating) : null,
+    userRatingCount: null,
+    photoNames: [],
+    types: [node.tags.leisure, node.tags.sport, node.tags.fitness].filter(Boolean) as string[],
+  }
+}
+
+function buildOverpassQuery(center: LatLng, radiusMeters: number, includedTypes: string[]): string {
+  const filters = includedTypes.map((t) => {
+    switch (t) {
+      case 'gym':
+      case 'fitness_center':
+        return `(node["leisure"="fitness_centre"](around:${radiusMeters},${center.latitude},${center.longitude});node["leisure"="sports_centre"](around:${radiusMeters},${center.latitude},${center.longitude});node["sport"="fitness"](around:${radiusMeters},${center.latitude},${center.longitude});)`
+      case 'yoga_studio':
+        return `node["leisure"="yoga"](around:${radiusMeters},${center.latitude},${center.longitude});`
+      case 'martial_arts_school':
+      case 'boxing_gym':
+        return `node["leisure"="martial_arts"](around:${radiusMeters},${center.latitude},${center.longitude});`
+      case 'swimming_pool':
+        return `node["leisure"="swimming_pool"](around:${radiusMeters},${center.latitude},${center.longitude});`
+      case 'health':
+        return `node["amenity"="healthcare"](around:${radiusMeters},${center.latitude},${center.longitude});`
+      default:
+        return ''
+    }
+  }).filter(Boolean).join('')
+
+  return `[out:json];(${filters});out body;`
+}
+
+function buildTextQuery(query: string, center?: LatLng, radiusMeters?: number): string {
+  const centerPart = center
+    ? `(around:${radiusMeters ?? 5000},${center.latitude},${center.longitude})`
+    : ''
+  return `[out:json];(node["name"~"${query}",i]${centerPart};way["name"~"${query}",i]${centerPart};);out center body;`
 }
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
-function normalizePlace(raw: RawPlace): Venue | null {
-  if (!raw.id) {
-    return null
-  }
-
-  const location =
-    raw.location?.latitude != null && raw.location?.longitude != null
-      ? { latitude: raw.location.latitude, longitude: raw.location.longitude }
-      : null
-
-  return {
-    id: raw.id,
-    name: raw.displayName?.text ?? 'Unnamed venue',
-    address: raw.formattedAddress ?? null,
-    location,
-    rating: raw.rating ?? null,
-    userRatingCount: raw.userRatingCount ?? null,
-    photoNames: (raw.photos ?? []).map((photo) => photo.name).filter((name): name is string => Boolean(name)),
-    types: raw.types ?? [],
-  }
-}
-
 export class VenueService {
-  private readonly apiKey: string
-  private readonly baseUrl: string
+  private readonly overpassUrl: string
   private readonly fetchImpl: typeof fetch
 
-  constructor(config: VenueServiceConfig) {
-    if (!config.apiKey) {
-      throw new VenueServiceError('A Google Maps API key is required to use the VenueService.')
-    }
-    this.apiKey = config.apiKey
-    this.baseUrl = config.baseUrl ?? DEFAULT_BASE_URL
+  constructor(config: VenueServiceConfig = {}) {
+    this.overpassUrl = config.overpassUrl ?? DEFAULT_OVERPASS_URL
     const fetchImpl = config.fetchImpl ?? globalThis.fetch
     if (!fetchImpl) {
       throw new VenueServiceError('No fetch implementation is available in this environment.')
@@ -134,115 +184,74 @@ export class VenueService {
     this.fetchImpl = fetchImpl.bind(globalThis)
   }
 
-  /** Find gyms and fitness venues near a coordinate. */
   async searchNearby(query: NearbyVenueQuery): Promise<Venue[]> {
-    const body = {
-      includedTypes: query.includedTypes ?? DEFAULT_GYM_TYPES,
-      maxResultCount: clamp(query.maxResults ?? DEFAULT_MAX_RESULTS, 1, 20),
-      locationRestriction: {
-        circle: {
-          center: query.center,
-          radius: clamp(query.radiusMeters ?? DEFAULT_RADIUS_METERS, 1, 50000),
-        },
-      },
-    }
-
-    const data = await this.post<{ places?: RawPlace[] }>('/places:searchNearby', body)
-    return (data.places ?? []).map(normalizePlace).filter((venue): venue is Venue => venue !== null)
+    const radius = clamp(query.radiusMeters ?? DEFAULT_RADIUS_METERS, 1, 50000)
+    const types = query.includedTypes ?? DEFAULT_GYM_TYPES
+    const overpassQuery = buildOverpassQuery(query.center, radius, types)
+    const data = await this.queryOverpass<{ elements?: OverpassNode[] }>(overpassQuery)
+    return (data.elements ?? []).map(normalizeNode).filter((v): v is Venue => v !== null)
   }
 
-  /** Free-text venue search, e.g. "boxing gyms in Austin". */
   async searchText(query: TextVenueQuery): Promise<Venue[]> {
-    const body: Record<string, unknown> = {
-      textQuery: query.query,
-      maxResultCount: clamp(query.maxResults ?? DEFAULT_MAX_RESULTS, 1, 20),
-    }
-
-    if (query.center) {
-      body.locationBias = {
-        circle: {
-          center: query.center,
-          radius: clamp(query.radiusMeters ?? DEFAULT_RADIUS_METERS, 1, 50000),
-        },
-      }
-    }
-
-    const data = await this.post<{ places?: RawPlace[] }>('/places:searchText', body)
-    return (data.places ?? []).map(normalizePlace).filter((venue): venue is Venue => venue !== null)
+    const overpassQuery = buildTextQuery(query.query, query.center, query.radiusMeters)
+    const data = await this.queryOverpass<{ elements?: OverpassNode[] }>(overpassQuery)
+    return (data.elements ?? []).map(normalizeNode).filter((v): v is Venue => v !== null)
   }
 
-  /** Fetch a single venue by its Google place id. */
   async getVenue(placeId: string): Promise<Venue | null> {
-    const data = await this.get<RawPlace>(`/places/${encodeURIComponent(placeId)}`, {
-      'X-Goog-FieldMask': VENUE_FIELD_MASK.replace(/places\./g, ''),
-    })
-    return normalizePlace(data)
+    const osmId = placeId.replace('osm_', '')
+    const query = `[out:json];(node(${osmId}););out body;`
+    const data = await this.queryOverpass<{ elements?: OverpassNode[] }>(query)
+    const node = data.elements?.[0]
+    return node ? normalizeNode(node) : null
   }
 
-  /**
-   * Resolve a Places photo reference (from {@link Venue.photoNames}) into a
-   * displayable image URL.
-   */
-  getPhotoUrl(photoName: string, maxWidthPx = 800): string {
-    const params = new URLSearchParams({
-      maxWidthPx: String(maxWidthPx),
-      key: this.apiKey,
-    })
-    return `${this.baseUrl}/${photoName}/media?${params.toString()}`
+  getPhotoUrl(_photoName: string, _maxWidthPx = 800): string {
+    return ''
   }
 
-  private async post<T>(path: string, body: unknown): Promise<T> {
-    return this.request<T>(path, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-FieldMask': VENUE_FIELD_MASK,
-      },
-      body: JSON.stringify(body),
-    })
-  }
-
-  private async get<T>(path: string, extraHeaders: Record<string, string> = {}): Promise<T> {
-    return this.request<T>(path, { method: 'GET', headers: extraHeaders })
-  }
-
-  private async request<T>(path: string, init: RequestInit): Promise<T> {
-    const headers = new Headers(init.headers)
-    headers.set('X-Goog-Api-Key', this.apiKey)
-
+  private async queryOverpass<T>(query: string): Promise<T> {
     let response: Response
     try {
-      response = await this.fetchImpl(`${this.baseUrl}${path}`, { ...init, headers })
+      response = await this.fetchImpl(this.overpassUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ data: query }),
+      })
     } catch (cause) {
-      throw new VenueServiceError(`Failed to reach the Places API: ${(cause as Error).message}`)
+      throw new VenueServiceError(`Failed to reach Overpass API: ${(cause as Error).message}`)
     }
 
     if (!response.ok) {
       const detail = await response.text().catch(() => '')
       throw new VenueServiceError(
-        `Places API request failed (${response.status}). ${detail}`.trim(),
+        `Overpass API request failed (${response.status}). ${detail}`.trim(),
         response.status,
       )
     }
 
     return (await response.json()) as T
   }
+
+  enrich(venue: Venue, center: LatLng): LifestyleVenue {
+    const distance = venue.location ? haversineMeters(center, venue.location) : null
+
+    const osmTags: Record<string, string> = {}
+    for (const t of venue.types) {
+      osmTags[t] = t
+    }
+    if (venue.types.length === 0) osmTags.fitness = 'fitness'
+
+    return {
+      ...venue,
+      vibeScore: computeVibeScore(venue.rating, venue.userRatingCount),
+      lifestyleTags: inferLifestyleTags(osmTags),
+      distance,
+      crowdDensity: inferCrowdDensity(),
+    }
+  }
 }
 
-/**
- * Convenience factory that reads the API key from the environment.
- * Returns `null` when no key is configured so callers can degrade gracefully.
- */
-export function createVenueService(config: Partial<VenueServiceConfig> = {}): VenueService | null {
-  const apiKey =
-    config.apiKey ??
-    process.env.GOOGLE_MAPS_API_KEY ??
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ??
-    ''
-
-  if (!apiKey) {
-    return null
-  }
-
-  return new VenueService({ ...config, apiKey })
+export function createVenueService(_config: Partial<VenueServiceConfig> = {}): VenueService {
+  return new VenueService()
 }

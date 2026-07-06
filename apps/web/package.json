@@ -11,13 +11,16 @@
   },
   "dependencies": {
     "@gymmingle/core": "file:../../packages/core",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.23.0",
     "next": "^15.3.3",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

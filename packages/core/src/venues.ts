@@ -1,5 +1,5 @@
-import { createVenueService, VenueServiceError } from './venue-service'
-import type { LatLng, Venue, VenueService } from './venue-service'
+import { VenueService, VenueServiceError } from './venue-service'
+import type { LatLng, Venue } from './venue-service'
 
 export type LifestyleTag =
   | 'strength'
@@ -53,61 +53,18 @@ export const NYC_REGIONS: Record<string, RegionConfig> = {
   },
 }
 
-const LIFESTYLE_TAG_MAP: Record<string, LifestyleTag[]> = {
-  gym: ['strength', 'cardio', 'functional'],
-  fitness_center: ['strength', 'cardio', 'functional'],
-  yoga_studio: ['yoga', 'mindfulness', 'wellness'],
-  martial_arts_school: ['martial-arts', 'combat-sports', 'functional'],
-  boxing_gym: ['martial-arts', 'combat-sports', 'cardio'],
-  crossfit_box: ['crossfit', 'strength', 'functional'],
-  swimming_pool: ['swimming', 'cardio', 'outdoor'],
-  pilates_studio: ['wellness', 'functional', 'mindfulness'],
-  spa: ['wellness', 'mindfulness'],
-  health: ['wellness', 'mindfulness'],
-  park: ['outdoor', 'cardio', 'social'],
-}
-
-function inferLifestyleTags(types: string[]): LifestyleTag[] {
-  const tags = new Set<LifestyleTag>()
-  for (const t of types) {
-    const mapped = LIFESTYLE_TAG_MAP[t]
-    if (mapped) mapped.forEach((tag) => tags.add(tag))
-  }
-  if (tags.size === 0) tags.add('functional')
-  return Array.from(tags)
-}
-
-function computeVibeScore(rating: number | null, userCount: number | null): number {
-  if (rating == null) return 50
-  const score = Math.round((rating / 5) * 60 + Math.min((userCount ?? 0) / 50, 40))
-  return Math.min(Math.max(score, 0), 100)
-}
-
-function inferCrowdDensity(): 'low' | 'moderate' | 'busy' | 'packed' {
-  const hour = new Date().getHours()
-  if (hour < 6 || hour > 22) return 'low'
-  if (hour < 9) return 'busy'
-  if (hour < 12) return 'moderate'
-  if (hour < 15) return 'low'
-  if (hour < 19) return 'busy'
-  return 'moderate'
-}
-
 export class LifestyleEngine {
-  private service: VenueService | null = null
+  private service: VenueService
 
-  constructor(apiKey?: string) {
-    const svc = createVenueService(apiKey ? { apiKey } : undefined)
-    if (svc) this.service = svc
+  constructor() {
+    this.service = new VenueService()
   }
 
   get isAvailable(): boolean {
-    return this.service !== null
+    return true
   }
 
   async discoverVenues(region: RegionConfig, lifestyleTags?: LifestyleTag[]): Promise<LifestyleVenue[]> {
-    if (!this.service) return this.fallbackVenues(region)
-
     const raw = await this.service.searchNearby({
       center: region.center,
       radiusMeters: region.radius,
@@ -115,7 +72,7 @@ export class LifestyleEngine {
       maxResults: 20,
     })
 
-    let results = raw.map((v) => this.enrich(v, region.center))
+    let results = raw.map((v) => this.service.enrich(v, region.center))
 
     if (lifestyleTags && lifestyleTags.length > 0) {
       results = results.filter((v) => lifestyleTags.some((tag) => v.lifestyleTags.includes(tag)))
@@ -125,8 +82,6 @@ export class LifestyleEngine {
   }
 
   async searchLifestyleVenues(query: string, region?: RegionConfig): Promise<LifestyleVenue[]> {
-    if (!this.service) return []
-
     const raw = await this.service.searchText({
       query: `${query} NYC Nassau fitness lifestyle`,
       center: region?.center ?? NYC_REGIONS.manhattan.center,
@@ -134,39 +89,7 @@ export class LifestyleEngine {
       maxResults: 15,
     })
 
-    return raw.map((v) => this.enrich(v, region?.center ?? NYC_REGIONS.manhattan.center))
-  }
-
-  private enrich(venue: Venue, center: LatLng): LifestyleVenue {
-    const distance = venue.location
-      ? haversineMeters(center, venue.location)
-      : null
-
-    return {
-      ...venue,
-      vibeScore: computeVibeScore(venue.rating, venue.userRatingCount),
-      lifestyleTags: inferLifestyleTags(venue.types),
-      distance,
-      crowdDensity: inferCrowdDensity(),
-    }
-  }
-
-  private fallbackVenues(region: RegionConfig): LifestyleVenue[] {
-    return curatedVenues
-      .filter((v) => v.regionId === findRegionKey(region))
-      .map((v) => {
-        const distance = v.location
-          ? haversineMeters(region.center, v.location)
-          : null
-        return {
-          ...v,
-          distance,
-          vibeScore: computeVibeScore(v.rating, v.userRatingCount),
-          lifestyleTags: inferLifestyleTags(v.types),
-          crowdDensity: inferCrowdDensity(),
-          address: v.address,
-        }
-      })
+    return raw.map((v) => this.service.enrich(v, region?.center ?? NYC_REGIONS.manhattan.center))
   }
 }
 
