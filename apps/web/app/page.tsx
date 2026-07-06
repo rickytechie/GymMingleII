@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import LandingHeader from '../src/components/LandingHeader'
 import WaitlistForm from '../src/components/WaitlistForm'
 import ProfileCard from '../src/components/ProfileCard'
-import { fetchProfiles, getDemoProfiles, coastalBrutalism, CITY_REGIONS, PremiumTier, multiCityVenues } from '@gymmingle/core'
+import { fetchProfiles, getDemoProfiles, coastalBrutalism, CITY_REGIONS, PremiumTier, multiCityVenues, COMMUNITY_PROFILES, getProfilesByCity } from '@gymmingle/core'
 import type { Profile } from '@gymmingle/core'
 
 const VenueMap = dynamic(() => import('../src/components/VenueMap'), { ssr: false })
@@ -18,12 +18,20 @@ export default function Page() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeCity, setActiveCity] = useState('nyc')
+  const [profileCount, setProfileCount] = useState(12)
   const activeRegion = CITY_REGIONS[activeCity]
   const demoProfiles = useMemo(() => getDemoProfiles(), [])
   const venues = useMemo(
     () => multiCityVenues.filter((v) => v.regionId === activeCity),
     [activeCity],
   )
+
+  const cityCommunityProfiles = useMemo(
+    () => getProfilesByCity(activeCity).slice(0, profileCount),
+    [activeCity, profileCount],
+  )
+
+  const totalCommunityProfiles = COMMUNITY_PROFILES.length
 
   useEffect(() => {
     let active = true
@@ -50,13 +58,13 @@ export default function Page() {
       <section className="coastal-section mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-2xl space-y-6">
           <span className="inline-flex rounded-full border border-[#CCFF00] bg-[#CCFF00]/15 px-3 py-1 text-sm font-semibold text-slate-800">
-            Lifestyle Orchestration Engine · 18 Cities
+            Lifestyle Orchestration Engine · 52 Markets
           </span>
           <h1 className="text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
             Your fitness. Your rules. Your tribe.
           </h1>
           <p className="max-w-xl text-lg text-slate-600">
-            GymMingle connects athletes across 18+ city markets through shared movement,
+            GymMingle connects {totalCommunityProfiles.toLocaleString()} athletes across 52 city markets through shared movement,
             lifestyle synergy, and premium MingleCoin-powered experiences.
           </p>
           <div className="flex flex-wrap gap-4">
@@ -114,17 +122,29 @@ export default function Page() {
         <PricingCards />
       </section>
 
-      {/* DEMO PROFILES */}
+      {/* COMMUNITY PROFILES */}
       <section className="mx-auto max-w-6xl px-6 pb-16 sm:px-8">
         <div className="mb-8">
           <h2 className="text-2xl font-semibold text-slate-900">Meet the community</h2>
           <p className="mt-2 text-sm text-slate-600">
-            Demo profiles spanning NYC, Boston, LA, Chicago, Miami, Detroit
+            {totalCommunityProfiles.toLocaleString()} active members across 52 markets
             <span className="ml-2 inline-flex items-center gap-1 rounded-full border border-[#CCFF00] bg-[#CCFF00]/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-800">
               <span className="h-1.5 w-1.5 rounded-full bg-[#CCFF00]" />
               MingleCoins enabled
             </span>
           </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-slate-400">Filter by city:</span>
+            <select
+              value={activeCity}
+              onChange={(e) => { setActiveCity(e.target.value); setProfileCount(12) }}
+              className="border-2 border-slate-200 bg-white px-3 py-1 text-sm font-semibold text-slate-700"
+            >
+              {cityKeys.map(([key, city]) => (
+                <option key={key} value={key}>{city.label} ({getProfilesByCity(key).length})</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="mb-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -133,7 +153,11 @@ export default function Page() {
               Loading members…
             </div>
           ) : profiles.length === 0 ? (
-            demoProfiles.map((p) => <ProfileCard key={p.id} profile={p} />)
+            cityCommunityProfiles.length > 0 ? (
+              cityCommunityProfiles.map((p) => <ProfileCard key={p.id} profile={p} />)
+            ) : (
+              demoProfiles.map((p) => <ProfileCard key={p.id} profile={p} />)
+            )
           ) : (
             profiles.map((profile) => <ProfileCard key={profile.id} profile={profile} />)
           )}
@@ -143,25 +167,26 @@ export default function Page() {
         <div className="glass-card mb-10 p-6">
           <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Premium Tiers</p>
           <div className="mt-3 flex flex-wrap gap-4">
-            {demoProfiles.map((p) => (
-              <div key={p.id} className="flex items-center gap-2 text-sm">
-                <span className="font-semibold text-slate-900">{p.name}</span>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                  p.mingleCoins.tier === PremiumTier.APEX
-                    ? 'bg-purple-900 text-[#CCFF00]'
-                    : p.mingleCoins.tier === PremiumTier.PEAK
-                    ? 'bg-slate-900 text-[#CCFF00]'
-                    : p.mingleCoins.tier === PremiumTier.MOMENTUM
-                    ? 'bg-[#CCFF00] text-slate-900'
-                    : p.mingleCoins.tier === PremiumTier.STARTER
-                    ? 'bg-slate-200 text-slate-700'
-                    : 'bg-slate-100 text-slate-400'
-                }`}>
-                  {p.mingleCoins.tier}
-                </span>
-                <span className="text-xs text-slate-400">{p.mingleCoins.balance} coins</span>
-              </div>
-            ))}
+            {([PremiumTier.FREE, PremiumTier.STARTER, PremiumTier.MOMENTUM, PremiumTier.PEAK, PremiumTier.APEX] as const).map((tier) => {
+              const count = COMMUNITY_PROFILES.filter((p) => p.mingleCoins.tier === tier).length
+              const bg = tier === PremiumTier.APEX
+                ? 'bg-purple-900 text-[#CCFF00]'
+                : tier === PremiumTier.PEAK
+                ? 'bg-slate-900 text-[#CCFF00]'
+                : tier === PremiumTier.MOMENTUM
+                ? 'bg-[#CCFF00] text-slate-900'
+                : tier === PremiumTier.STARTER
+                ? 'bg-slate-200 text-slate-700'
+                : 'bg-slate-100 text-slate-400'
+              return (
+                <div key={tier} className="flex items-center gap-2 text-sm">
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${bg}`}>
+                    {tier}
+                  </span>
+                  <span className="text-xs text-slate-400">{count} members</span>
+                </div>
+              )
+            })}
           </div>
         </div>
 
@@ -179,7 +204,7 @@ export default function Page() {
               Discover venues that match your vibe
             </h2>
             <p className="mt-3 max-w-xl text-white/60">
-              Curated venues across 18 markets — powered by OpenStreetMap + Leaflet.
+              Curated venues across 52 markets — powered by OpenStreetMap + Leaflet.
             </p>
           </div>
 
