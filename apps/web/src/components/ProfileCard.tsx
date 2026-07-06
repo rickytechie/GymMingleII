@@ -1,6 +1,9 @@
 'use client'
 
-import { resolveAvatarUrl } from '@gymmingle/core'
+import { useState } from 'react'
+import TinderCard from 'react-tinder-card'
+import { resolveAvatarUrl, PremiumFeature } from '@gymmingle/core'
+import { ReportModal } from './ReportModal'
 import type { Profile } from '@gymmingle/core'
 
 export type Decision = 'like' | 'maybe' | 'pass' | null
@@ -10,9 +13,13 @@ interface ProfileCardProps {
   decision?: Decision
   onDecision?: (id: string, decision: Decision) => void
   onClick?: () => void
+  enableSwipe?: boolean
+  onSwipeLeft?: () => void
+  onSwipeRight?: () => void
 }
 
-export function ProfileCard({ profile, decision, onDecision, onClick }: ProfileCardProps) {
+export function ProfileCard({ profile, decision, onDecision, onClick, enableSwipe, onSwipeLeft, onSwipeRight }: ProfileCardProps) {
+  const [showReport, setShowReport] = useState(false)
   const imageUrl = resolveAvatarUrl(profile.avatar_url, {
     seed: profile.id || profile.name,
     size: 300,
@@ -22,9 +29,8 @@ export function ProfileCard({ profile, decision, onDecision, onClick }: ProfileC
     if (onDecision) onDecision(profile.id, d)
   }
 
-  return (
-    <article className="group border-2 border-black bg-white transition hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#000]">
-      {/* Image */}
+  const cardContent = (
+    <>
       <div className="aspect-[4/3] overflow-hidden bg-black cursor-pointer" onClick={onClick}>
         <img
           src={imageUrl}
@@ -33,19 +39,23 @@ export function ProfileCard({ profile, decision, onDecision, onClick }: ProfileC
           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
         />
       </div>
-
-      {/* Content */}
       <div className="p-5">
         <div className="flex items-start justify-between gap-2" onClick={onClick}>
           <div className="min-w-0">
-            <h3 className="text-lg font-black text-black">{profile.name}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-black text-black">{profile.name}</h3>
+              {profile.premiumFeatures?.includes(PremiumFeature.VerifiedBadge) && (
+                <span className="text-[9px] font-bold uppercase tracking-wider bg-black text-[#CCFF00] px-1.5 py-0.5 border border-[#CCFF00]">
+                  ✓ Verified
+                </span>
+              )}
+            </div>
             {profile.bio && (
               <p className="mt-1 text-sm text-black/60 line-clamp-2">{profile.bio}</p>
             )}
           </div>
         </div>
 
-        {/* Like / Maybe / Pass */}
         <div className="mt-4 flex gap-2">
           <button
             onClick={(e) => { e.stopPropagation(); handleDecision('pass') }}
@@ -78,8 +88,44 @@ export function ProfileCard({ profile, decision, onDecision, onClick }: ProfileC
             ♥ Like
           </button>
         </div>
+
+        <button
+          onClick={(e) => { e.stopPropagation(); setShowReport(true) }}
+          className="mt-3 w-full border-2 border-red-200 text-red-500 text-[10px] font-bold uppercase tracking-wider py-1.5 hover:border-red-500 hover:text-red-600 transition-colors"
+        >
+          ⚑ Report User
+        </button>
       </div>
-    </article>
+    </>
+  )
+
+  return (
+    <>
+      {enableSwipe ? (
+        <TinderCard
+          onSwipe={(dir) => {
+            if (dir === 'left') { handleDecision('pass'); onSwipeLeft?.() }
+            if (dir === 'right') { handleDecision('like'); onSwipeRight?.() }
+          }}
+          preventSwipe={['up', 'down']}
+          className="group border-2 border-black bg-white transition hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#000]"
+        >
+          {cardContent}
+        </TinderCard>
+      ) : (
+        <article className="group border-2 border-black bg-white transition hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#000]">
+          {cardContent}
+        </article>
+      )}
+      {showReport && (
+        <ReportModal
+          type="user"
+          targetName={profile.name}
+          targetId={profile.id}
+          onClose={() => setShowReport(false)}
+        />
+      )}
+    </>
   )
 }
 

@@ -6,7 +6,8 @@ import LandingHeader from '../src/components/LandingHeader'
 import WaitlistForm from '../src/components/WaitlistForm'
 import ProfileCard from '../src/components/ProfileCard'
 import ProfileModal from '../src/components/ProfileModal'
-import { CITY_REGIONS, PremiumTier, multiCityVenues, COMMUNITY_PROFILES, getProfilesByCity } from '@gymmingle/core'
+import { ReportModal } from '../src/components/ReportModal'
+import { CITY_REGIONS, PremiumTier, multiCityVenues, COMMUNITY_PROFILES, getProfilesByCity, VENUE_REGISTRY } from '@gymmingle/core'
 import type { CommunityProfile } from '@gymmingle/core'
 import type { Decision } from '../src/components/ProfileCard'
 
@@ -45,6 +46,15 @@ export default function Page() {
 
   const handleCardClick = useCallback((profile: CommunityProfile) => {
     setSelectedProfile(profile)
+  }, [])
+
+  const [reportVenue, setReportVenue] = useState<{ name: string; id: string } | null>(null)
+
+  const getRegistryVenueInfo = useCallback((venueName: string) => {
+    const lower = venueName.toLowerCase()
+    return VENUE_REGISTRY.find(
+      (r) => r.name.toLowerCase().includes(lower) || lower.includes(r.name.toLowerCase()),
+    )
   }, [])
 
   return (
@@ -244,23 +254,40 @@ export default function Page() {
                   <p className="text-sm text-white/30">No curated venues yet for this city.</p>
                 </div>
               ) : (
-                venues.slice(0, 10).map((venue) => (
-                  <div key={venue.id} className="border-2 border-white/10 bg-white/5 p-4">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-white">{venue.name}</h3>
-                      <span className="border border-white/20 px-2 py-0.5 text-[10px] font-bold text-white/50 uppercase tracking-wider">
-                        {venue.category}
-                      </span>
+                venues.slice(0, 10).map((venue) => {
+                  const reg = getRegistryVenueInfo(venue.name)
+                  return (
+                    <div key={venue.id} className="border-2 border-white/10 bg-white/5 p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <h3 className="text-sm font-bold text-white truncate">{venue.name}</h3>
+                          <span className="border border-white/20 px-2 py-0.5 text-[10px] font-bold text-white/50 uppercase tracking-wider shrink-0">
+                            {venue.category}
+                          </span>
+                        </div>
+                      </div>
+                      {venue.address && (
+                        <p className="mt-0.5 truncate text-xs text-white/40">{venue.address}</p>
+                      )}
+                      {reg && (
+                        <p className="mt-0.5 text-[10px] text-white/30 leading-tight line-clamp-2">{reg.description}</p>
+                      )}
+                      <div className="mt-1 flex items-center gap-3 text-xs text-white/40">
+                        <span>⭐ {venue.rating.toFixed(1)}</span>
+                        <span>{venue.userRatingCount.toLocaleString()} reviews</span>
+                      </div>
+                      {reg && (
+                        <p className="mt-0.5 text-[10px] italic text-white/30 line-clamp-1">{reg.reviewSnippet}</p>
+                      )}
+                      <button
+                        onClick={() => setReportVenue({ name: venue.name, id: venue.id })}
+                        className="mt-2 border border-red-400/30 text-red-400/60 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 hover:border-red-400 hover:text-red-400 transition-colors"
+                      >
+                        ⚑ Report Venue
+                      </button>
                     </div>
-                    {venue.address && (
-                      <p className="mt-0.5 truncate text-xs text-white/40">{venue.address}</p>
-                    )}
-                    <div className="mt-1 flex items-center gap-3 text-xs text-white/40">
-                      <span>⭐ {venue.rating.toFixed(1)}</span>
-                      <span>{venue.userRatingCount.toLocaleString()} reviews</span>
-                    </div>
-                  </div>
-                ))
+                  )
+                })
               )}
             </div>
           </div>
@@ -319,6 +346,16 @@ export default function Page() {
           onClose={() => setSelectedProfile(null)}
           decision={decisions[selectedProfile.id] ?? null}
           onDecision={handleDecision}
+        />
+      )}
+
+      {/* Report Venue Modal */}
+      {reportVenue && (
+        <ReportModal
+          type="venue"
+          targetName={reportVenue.name}
+          targetId={reportVenue.id}
+          onClose={() => setReportVenue(null)}
         />
       )}
     </main>

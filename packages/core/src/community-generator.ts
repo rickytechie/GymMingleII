@@ -4,6 +4,29 @@ import type { MingleCoinAccount } from './minglecoin'
 import { PremiumTier, PremiumFeature, createFreeAccount } from './minglecoin'
 import { CITY_REGIONS } from './venues'
 
+const UNSPLASH_PORTRAITS = [
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1479936343636-73cdc5aae0c3?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1516726817505-f5ed825624d8?w=300&h=400&fit=crop&crop=face',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=400&fit=crop&crop=face',
+]
+
 export interface CommunityProfile extends Profile, DatingProfile {
   fitnessStyle: string
   mingleCoins: MingleCoinAccount
@@ -205,7 +228,7 @@ function generateProfile(
     name,
     age,
     bio: pick(BIOS),
-    avatar_url: null,
+    avatar_url: pick(UNSPLASH_PORTRAITS),
     fitnessStyle: pick(fitnessStyles),
     mingleCoins: {
       balance,

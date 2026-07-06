@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { resolveAvatarUrl } from '@gymmingle/core'
+import { ReportModal } from './ReportModal'
 import type { CommunityProfile } from '@gymmingle/core'
 import type { Decision } from './ProfileCard'
 
@@ -13,6 +14,7 @@ interface ProfileModalProps {
 }
 
 export function ProfileModal({ profile, onClose, decision, onDecision }: ProfileModalProps) {
+  const [showReport, setShowReport] = useState(false)
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -159,45 +161,69 @@ export function ProfileModal({ profile, onClose, decision, onDecision }: Profile
         </div>
 
         {/* Decision footer */}
-        <div className="border-t-2 border-black p-6 flex gap-3">
-          <button
-            onClick={() => handleDecision('pass')}
-            className={`flex-1 border-2 py-3 text-sm font-bold uppercase tracking-wider transition-colors ${
-              decision === 'pass'
-                ? 'border-black bg-black text-white'
-                : 'border-black/20 text-black/60 hover:border-black hover:text-black'
-            }`}
-          >
-            ✕ Pass
-          </button>
-          <button
-            onClick={() => handleDecision('maybe')}
-            className={`flex-1 border-2 py-3 text-sm font-bold uppercase tracking-wider transition-colors ${
-              decision === 'maybe'
-                ? 'border-black bg-black text-white'
-                : 'border-black/20 text-black/60 hover:border-black hover:text-black'
-            }`}
-          >
-            ? Maybe
-          </button>
-          <button
-            onClick={() => handleDecision('like')}
-            className={`flex-1 border-2 py-3 text-sm font-bold uppercase tracking-wider transition-colors ${
-              decision === 'like'
-                ? 'border-[#CCFF00] bg-black text-[#CCFF00]'
-                : 'border-black/20 text-black/60 hover:border-[#CCFF00] hover:text-black'
-            }`}
-          >
-            ♥ Like
-          </button>
-          <button
-            onClick={onClose}
-            className="border-2 border-black bg-black text-white px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-black/80 transition-colors"
-          >
-            Close
-          </button>
+        <div className="border-t-2 border-black p-6 flex flex-col gap-3">
+          <div className="flex gap-3">
+            <button
+              onClick={() => handleDecision('pass')}
+              className={`flex-1 border-2 py-3 text-sm font-bold uppercase tracking-wider transition-colors ${
+                decision === 'pass'
+                  ? 'border-black bg-black text-white'
+                  : 'border-black/20 text-black/60 hover:border-black hover:text-black'
+              }`}
+            >
+              ✕ Pass
+            </button>
+            <button
+              onClick={() => handleDecision('maybe')}
+              className={`flex-1 border-2 py-3 text-sm font-bold uppercase tracking-wider transition-colors ${
+                decision === 'maybe'
+                  ? 'border-black bg-black text-white'
+                  : 'border-black/20 text-black/60 hover:border-black hover:text-black'
+              }`}
+            >
+              ? Maybe
+            </button>
+            <button
+              onClick={() => handleDecision('like')}
+              className={`flex-1 border-2 py-3 text-sm font-bold uppercase tracking-wider transition-colors ${
+                decision === 'like'
+                  ? 'border-[#CCFF00] bg-black text-[#CCFF00]'
+                  : 'border-black/20 text-black/60 hover:border-[#CCFF00] hover:text-black'
+              }`}
+            >
+              ♥ Like
+            </button>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => {/* placeholder: integrate with messages table */}}
+              className="flex-1 border-2 border-black/20 text-black/60 py-3 text-xs font-bold uppercase tracking-wider hover:border-black hover:text-black transition-colors"
+            >
+              ✉ Message
+            </button>
+            <button
+              onClick={() => setShowReport(true)}
+              className="flex-1 border-2 border-red-200 text-red-500 py-3 text-xs font-bold uppercase tracking-wider hover:border-red-500 hover:text-red-600 transition-colors"
+            >
+              ⚑ Report
+            </button>
+            <button
+              onClick={onClose}
+              className="border-2 border-black bg-black text-white px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-black/80 transition-colors"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
+      {showReport && (
+        <ReportModal
+          type="user"
+          targetName={profile.name}
+          targetId={profile.id}
+          onClose={() => setShowReport(false)}
+        />
+      )}
     </div>
   )
 }

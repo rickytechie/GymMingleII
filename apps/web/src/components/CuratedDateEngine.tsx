@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import type { CuratedVenue, VenueCategory } from '@gymmingle/core'
-import { multiCityVenues } from '@gymmingle/core'
+import { multiCityVenues, VENUE_REGISTRY } from '@gymmingle/core'
+import { AddCustomVenue } from './AddCustomVenue'
 
 export interface DateStage {
   id: 'sweat' | 'nourish' | 'unwind'
@@ -64,6 +65,7 @@ export function CuratedDateEngine({ cityKey }: CuratedDateEngineProps) {
     nourish: null,
     unwind: null,
   })
+  const [showCustom, setShowCustom] = useState(false)
 
   const stage = DATE_STAGES[stageIndex]
   const allowed = useMemo(() => categoriesForDuration(duration), [duration])
@@ -79,6 +81,13 @@ export function CuratedDateEngine({ cityKey }: CuratedDateEngineProps) {
       .sort((a, b) => b.rating - a.rating)
       .slice(0, 50)
   }, [cityVenues, stage, allowed])
+
+  const getRegistryInfo = useCallback((venueName: string) => {
+    const lower = venueName.toLowerCase()
+    return VENUE_REGISTRY.find(
+      (r) => r.name.toLowerCase().includes(lower) || lower.includes(r.name.toLowerCase()),
+    )
+  }, [])
 
   const selectVenue = useCallback((venue: CuratedVenue) => {
     setSelected((prev) => ({ ...prev, [stage.id]: venue }))
@@ -166,7 +175,29 @@ export function CuratedDateEngine({ cityKey }: CuratedDateEngineProps) {
           </span>
         </div>
 
-        {stageVenues.length === 0 ? (
+        {showCustom ? (
+          <AddCustomVenue
+            stage={stage.id}
+            cityKey={cityKey}
+            onSaved={(v) => {
+              const customVenue: CuratedVenue = {
+                id: `custom_${Date.now()}`,
+                name: v.name,
+                address: v.address,
+                location: { latitude: 0, longitude: 0 },
+                rating: v.rating,
+                userRatingCount: 1,
+                photoNames: [],
+                types: [],
+                regionId: cityKey,
+                category: stage.categories[0],
+              }
+              selectVenue(customVenue)
+              setShowCustom(false)
+            }}
+            onClose={() => setShowCustom(false)}
+          />
+        ) : stageVenues.length === 0 ? (
           <div className="border-2 border-slate-200 bg-slate-50 p-10 text-center">
             <p className="text-slate-500 font-bold">No venues match your duration + city.</p>
             <p className="text-xs text-slate-400 mt-1">Try a longer duration or different city.</p>
@@ -175,6 +206,7 @@ export function CuratedDateEngine({ cityKey }: CuratedDateEngineProps) {
           <div className="grid gap-3 sm:grid-cols-2 max-h-[420px] overflow-y-auto pr-2">
             {stageVenues.map((venue) => {
               const isSelected = currentSelection?.id === venue.id
+              const reg = getRegistryInfo(venue.name)
               return (
                 <button
                   key={venue.id}
@@ -192,10 +224,16 @@ export function CuratedDateEngine({ cityKey }: CuratedDateEngineProps) {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-slate-500 truncate">{venue.address}</p>
+                  {reg && (
+                    <p className="mt-1 text-[10px] text-slate-500 leading-tight line-clamp-2">{reg.description}</p>
+                  )}
                   <div className="mt-2 flex items-center gap-3 text-[11px] text-slate-400">
                     <span>⭐ {venue.rating.toFixed(1)}</span>
                     <span>{venue.userRatingCount.toLocaleString()} reviews</span>
                   </div>
+                  {reg && (
+                    <p className="mt-1 text-[10px] italic text-slate-400 line-clamp-1">{reg.reviewSnippet}</p>
+                  )}
                 </button>
               )
             })}
@@ -204,13 +242,21 @@ export function CuratedDateEngine({ cityKey }: CuratedDateEngineProps) {
 
         {/* Navigation */}
         <div className="mt-6 flex items-center justify-between border-t-2 border-slate-200 pt-4">
-          <button
-            onClick={prev}
-            disabled={!canGoBack}
-            className="border-2 border-slate-200 px-5 py-2 text-sm font-bold text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
-          >
-            ← Back
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={prev}
+              disabled={!canGoBack}
+              className="border-2 border-slate-200 px-5 py-2 text-sm font-bold text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 transition-colors"
+            >
+              ← Back
+            </button>
+            <button
+              onClick={() => setShowCustom((s) => !s)}
+              className="border-2 border-dashed border-slate-300 px-3 py-2 text-xs font-bold text-slate-500 hover:border-slate-900 hover:text-slate-900 transition-colors"
+            >
+              + Add Custom/Skipped
+            </button>
+          </div>
           <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1">
             {totalSelected}/3 selected
           </span>
