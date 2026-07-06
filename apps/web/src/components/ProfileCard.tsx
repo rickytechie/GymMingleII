@@ -1,25 +1,31 @@
-import { resolveAvatarUrl, type AvatarProvider, type Profile } from '@gymmingle/core'
+'use client'
+
+import { resolveAvatarUrl } from '@gymmingle/core'
+import type { Profile } from '@gymmingle/core'
+
+export type Decision = 'like' | 'maybe' | 'pass' | null
 
 interface ProfileCardProps {
   profile: Profile
-  fallbackProvider?: AvatarProvider
+  decision?: Decision
+  onDecision?: (id: string, decision: Decision) => void
+  onClick?: () => void
 }
 
-function formatDate(iso: string): string {
-  const d = new Date(iso)
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
-
-export function ProfileCard({ profile, fallbackProvider = 'photo' }: ProfileCardProps) {
+export function ProfileCard({ profile, decision, onDecision, onClick }: ProfileCardProps) {
   const imageUrl = resolveAvatarUrl(profile.avatar_url, {
     seed: profile.id || profile.name,
-    provider: fallbackProvider,
-    size: 640,
+    size: 300,
   })
 
+  const handleDecision = (d: Decision) => {
+    if (onDecision) onDecision(profile.id, d)
+  }
+
   return (
-    <article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="aspect-[4/3] overflow-hidden bg-slate-100">
+    <article className="group border-2 border-black bg-white transition hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#000]">
+      {/* Image */}
+      <div className="aspect-[4/3] overflow-hidden bg-black cursor-pointer" onClick={onClick}>
         <img
           src={imageUrl}
           alt={profile.name}
@@ -27,39 +33,51 @@ export function ProfileCard({ profile, fallbackProvider = 'photo' }: ProfileCard
           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
         />
       </div>
+
+      {/* Content */}
       <div className="p-5">
-        <h3 className="text-lg font-semibold text-slate-900">{profile.name}</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{profile.bio || 'No bio yet.'}</p>
-
-        {profile.totalVisits != null && (
-          <div className="mt-4 border-t border-slate-100 pt-3">
-            <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
-              <span className="font-semibold text-slate-900">{profile.totalVisits}</span> visits
-              {profile.currentStreak != null && profile.currentStreak > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-electric-lime/15 px-2 py-0.5 font-semibold text-slate-900">
-                  <span className="h-1.5 w-1.5 rounded-full bg-electric-lime" />
-                  {profile.currentStreak} streak
-                </span>
-              )}
-            </div>
-
-            {(profile.visitHistory ?? []).length > 0 && (
-              <div className="grid grid-cols-3 gap-1.5">
-                {(profile.visitHistory ?? []).slice(0, 9).map((v, i) => (
-                  <div
-                    key={`${v.venueId}-${i}`}
-                    className="rounded-lg border border-slate-200 bg-slate-50 p-2 text-center"
-                  >
-                    <div className="truncate text-[11px] font-medium text-slate-800">
-                      {v.venueName}
-                    </div>
-                    <div className="mt-0.5 text-[10px] text-slate-500">{formatDate(v.visitedAt)}</div>
-                  </div>
-                ))}
-              </div>
+        <div className="flex items-start justify-between gap-2" onClick={onClick}>
+          <div className="min-w-0">
+            <h3 className="text-lg font-black text-black">{profile.name}</h3>
+            {profile.bio && (
+              <p className="mt-1 text-sm text-black/60 line-clamp-2">{profile.bio}</p>
             )}
           </div>
-        )}
+        </div>
+
+        {/* Like / Maybe / Pass */}
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); handleDecision('pass') }}
+            className={`flex-1 border-2 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
+              decision === 'pass'
+                ? 'border-black bg-black text-white'
+                : 'border-black/20 text-black/60 hover:border-black hover:text-black'
+            }`}
+          >
+            ✕ Pass
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleDecision('maybe') }}
+            className={`flex-1 border-2 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
+              decision === 'maybe'
+                ? 'border-black bg-black text-white'
+                : 'border-black/20 text-black/60 hover:border-black hover:text-black'
+            }`}
+          >
+            ? Maybe
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleDecision('like') }}
+            className={`flex-1 border-2 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
+              decision === 'like'
+                ? 'border-[#CCFF00] bg-black text-[#CCFF00]'
+                : 'border-black/20 text-black/60 hover:border-[#CCFF00] hover:text-black'
+            }`}
+          >
+            ♥ Like
+          </button>
+        </div>
       </div>
     </article>
   )

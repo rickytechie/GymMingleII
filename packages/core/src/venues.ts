@@ -471,17 +471,17 @@ function toRad(deg: number): number {
 }
 
 export const coastalBrutalism = {
-  glass: 'bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl',
-  glassDark: 'bg-slate-950/70 backdrop-blur-xl border border-white/10 shadow-xl',
-  card: 'rounded-2xl border border-white/20 bg-white/5 backdrop-blur-lg shadow-lg',
-  accent: 'text-electric-lime',
-  highContrast: 'text-white font-black tracking-tight',
-  muted: 'text-white/60 text-sm',
-  pill: 'inline-flex rounded-full border border-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider',
+  glass: 'bg-white/5 backdrop-blur-xl border-2 border-black',
+  glassDark: 'bg-black/85 backdrop-blur-xl border-2 border-white',
+  card: 'border-2 border-black bg-white/5 backdrop-blur-lg',
+  accent: 'text-[#CCFF00]',
+  highContrast: 'text-black font-black tracking-tight',
+  muted: 'text-black/60 text-sm',
+  pill: 'inline-flex border-2 border-black px-3 py-1 text-xs font-bold uppercase tracking-wider',
   section: 'py-20 px-6 sm:px-8',
   grid: 'grid gap-6 md:grid-cols-2 lg:grid-cols-3',
   vibeDot: (score: number) =>
-    score >= 70 ? 'bg-electric-lime' : score >= 40 ? 'bg-sunset-orange' : 'bg-white/30',
+    score >= 70 ? 'bg-[#CCFF00]' : score >= 40 ? 'bg-black' : 'bg-black/30',
 } as const
 
 export const MAP_CONFIG = {

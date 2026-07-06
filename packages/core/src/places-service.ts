@@ -1,5 +1,6 @@
 import type { VenueCategory } from './venues'
 import type { Venue, LatLng } from './venue-service'
+import { SEARCH_ANCHORS } from './venue-service'
 
 export interface PlacesServiceConfig {
   apiKey?: string
@@ -137,29 +138,41 @@ export class GooglePlacesVenueService {
 
     const allVenues: Venue[] = []
     const seen = new Set<string>()
+    const anchors = SEARCH_ANCHORS.filter((a) =>
+      cityKey === 'nyc' || cityLabel.toLowerCase().includes('new york'),
+    )
 
-    for (const [_cat, queries] of Object.entries(CATEGORY_QUERIES)) {
-      for (const query of queries) {
+    const locations = anchors.length > 0
+      ? anchors.map((a) => ({ lat: a.location.latitude, lng: a.location.longitude, label: a.label }))
+      : [{ lat: center.latitude, lng: center.longitude, label: cityLabel }]
+
+    for (const loc of locations) {
+      if (allVenues.length >= 100) break
+
+      for (const [_cat, queries] of Object.entries(CATEGORY_QUERIES)) {
         if (allVenues.length >= 100) break
 
-        try {
-          const results = await this.searchText(`${query} in ${cityLabel}`, {
-            lat: center.latitude,
-            lng: center.longitude,
-            radius,
-          })
+        for (const query of queries) {
+          if (allVenues.length >= 100) break
 
-          for (const v of results) {
-            if (!seen.has(v.id)) {
-              seen.add(v.id)
-              allVenues.push(v)
+          try {
+            const results = await this.searchText(`${query} in ${loc.label}`, {
+              lat: loc.lat,
+              lng: loc.lng,
+              radius: Math.min(radius, 3000),
+            })
+
+            for (const v of results) {
+              if (!seen.has(v.id)) {
+                seen.add(v.id)
+                allVenues.push(v)
+              }
             }
+          } catch {
+            // skip failed queries
           }
-        } catch {
-          // skip failed queries for individual categories
         }
       }
-      if (allVenues.length >= 100) break
     }
 
     return allVenues.slice(0, 100)
