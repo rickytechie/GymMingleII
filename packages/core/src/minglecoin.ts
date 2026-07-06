@@ -1,9 +1,9 @@
 export enum PremiumTier {
-  FREE = 'free',
-  STARTER = 'starter',
-  PREMIUM_MOMENTUM = 'premium_momentum',
-  ELITE_PEAK = 'elite_peak',
-  APEX_VIP = 'apex_vip',
+  FREE = 'Free',
+  STARTER = 'Starter',
+  MOMENTUM = 'Momentum',
+  PEAK = 'Peak',
+  APEX = 'Apex',
 }
 
 export enum PremiumFeature {
@@ -63,7 +63,7 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
     PremiumFeature.ExpandedHistory,
     PremiumFeature.BasicTemplates,
   ],
-  [PremiumTier.PREMIUM_MOMENTUM]: [
+  [PremiumTier.MOMENTUM]: [
     PremiumFeature.AdvancedChat,
     PremiumFeature.UnlimitedLikes,
     PremiumFeature.VenueInsights,
@@ -76,7 +76,7 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
     PremiumFeature.Analytics,
     PremiumFeature.ExclusiveLocalEvents,
   ],
-  [PremiumTier.ELITE_PEAK]: [
+  [PremiumTier.PEAK]: [
     PremiumFeature.AdvancedChat,
     PremiumFeature.UnlimitedLikes,
     PremiumFeature.VenueInsights,
@@ -96,7 +96,7 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
     PremiumFeature.PrioritySupport,
     PremiumFeature.HighCoinEarning,
   ],
-  [PremiumTier.APEX_VIP]: [
+  [PremiumTier.APEX]: [
     PremiumFeature.AdvancedChat,
     PremiumFeature.UnlimitedLikes,
     PremiumFeature.VenueInsights,
@@ -124,9 +124,9 @@ const TIER_FEATURES: Record<PremiumTier, PremiumFeature[]> = {
 const TIER_MONTHLY_COST = {
   [PremiumTier.FREE]: 0,
   [PremiumTier.STARTER]: 500,
-  [PremiumTier.PREMIUM_MOMENTUM]: 1500,
-  [PremiumTier.ELITE_PEAK]: 3500,
-  [PremiumTier.APEX_VIP]: 7500,
+  [PremiumTier.MOMENTUM]: 1500,
+  [PremiumTier.PEAK]: 3500,
+  [PremiumTier.APEX]: 7500,
 }
 
 export function getTierFeatures(tier: PremiumTier): PremiumFeature[] {
@@ -193,11 +193,11 @@ export function canAccessVenuePerks(account: MingleCoinAccount): boolean {
 }
 
 export function isPremiumStatus(account: MingleCoinAccount): boolean {
-  return account.tier === PremiumTier.PREMIUM_MOMENTUM || account.tier === PremiumTier.ELITE_PEAK || account.tier === PremiumTier.APEX_VIP
+  return account.tier === PremiumTier.MOMENTUM || account.tier === PremiumTier.PEAK || account.tier === PremiumTier.APEX
 }
 
 export function calculateCoinsToUpgrade(currentTier: PremiumTier, targetTier: PremiumTier): number {
-  const tiers = [PremiumTier.FREE, PremiumTier.STARTER, PremiumTier.PREMIUM_MOMENTUM, PremiumTier.ELITE_PEAK, PremiumTier.APEX_VIP]
+  const tiers = [PremiumTier.FREE, PremiumTier.STARTER, PremiumTier.MOMENTUM, PremiumTier.PEAK, PremiumTier.APEX]
   const currentIdx = tiers.indexOf(currentTier)
   const targetIdx = tiers.indexOf(targetTier)
   if (currentIdx < 0 || targetIdx < 0 || targetIdx <= currentIdx) return 0

@@ -55,21 +55,21 @@ const tiers = [
     color: 'bg-slate-200 text-slate-700',
   },
   {
-    name: 'Premium (Momentum)',
+    name: 'Momentum',
     coins: '1,500 / month',
     features: ['Advanced chat', 'Unlimited likes', 'Venue insights', 'Read receipts', 'Lifestyle filters', 'Analytics', 'Exclusive local events'],
     color: 'bg-[#CCFF00] text-slate-900',
   },
   {
-    name: 'Elite (Peak)',
+    name: 'Peak',
     coins: '3,500 / month',
     features: ['Advanced chat', 'Unlimited likes', 'Venue insights', 'Read receipts', 'Priority matching', 'Incognito mode', 'Verified badge', 'Lifestyle filters', 'Kink discovery', 'Partner gym access', 'Priority support', 'High coin earning'],
     color: 'bg-slate-900 text-[#CCFF00]',
   },
   {
-    name: 'Apex (VIP)',
+    name: 'Apex',
     coins: '7,500 / month',
-    features: ['Concierge booking', '1-on-1 coaching', 'VIP venue entry', 'All Elite features'],
+    features: ['Concierge booking', '1-on-1 coaching', 'VIP venue entry', 'All Peak features'],
     color: 'bg-purple-900 text-[#CCFF00]',
   },
 ]
