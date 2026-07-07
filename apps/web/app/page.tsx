@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 import LandingHeader from '../src/components/LandingHeader'
 import WaitlistForm from '../src/components/WaitlistForm'
 import ProfileCard from '../src/components/ProfileCard'
@@ -353,6 +354,14 @@ export default function Page() {
       </section>
 
       <footer className="border-t-2 border-black bg-white py-8 text-center text-xs text-black/50">
+        <div className="mx-auto mb-4 flex max-w-6xl items-center justify-center gap-6 px-6">
+          <Link
+            href="/vault"
+            className="border-2 border-black bg-black px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-[#CCFF00] transition hover:opacity-90"
+          >
+            🔒 Strategy Vault
+          </Link>
+        </div>
         <p>&copy; <a href="https://openstreetmap.org/copyright" className="underline hover:text-black">OpenStreetMap</a> contributors. Map data is open access under the <a href="https://opendatacommons.org/licenses/odbl/" className="underline hover:text-black">ODbL</a>.</p>
         <p className="mt-1">Built and Designed by RKYRNSM | RICKY RANSOM, LLC | &copy; 2026 RICKY RANSOM, LLC</p>
       </footer>
