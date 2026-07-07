@@ -1,6 +1,7 @@
 'use client'
 
-import Link from 'next/link'
+import SiteHeader from '../../src/components/SiteHeader'
+import SiteFooter from '../../src/components/SiteFooter'
 
 const SERVICES = [
   { service: 'Brand Architecture & Identity', scope: 'Full-stack creative direction', rate: '$150/hr' },
@@ -22,18 +23,7 @@ const FIVE_CS = [
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-white text-black">
-      <nav className="flex w-full items-center justify-between border-b-2 border-black bg-white px-6 py-4 sm:px-8">
-        <Link href="/" className="block">
-          <p className="text-lg font-black tracking-tight text-black">GymMingle</p>
-          <p className="text-xs font-bold text-black/50">by RKYRNSM</p>
-        </Link>
-        <Link
-          href="/"
-          className="border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-black hover:text-white"
-        >
-          ← Back
-        </Link>
-      </nav>
+      <SiteHeader />
 
       <div className="mx-auto max-w-4xl px-6 py-16 sm:px-8">
         <section className="mb-20">
@@ -120,14 +110,7 @@ export default function AboutPage() {
         </section>
       </div>
 
-      <footer className="border-t-2 border-black bg-white py-8 text-center text-xs text-black/50">
-        <div className="mx-auto flex max-w-6xl items-center justify-center gap-6 px-6">
-          <Link href="/vault" className="border-2 border-black bg-black px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-[#CCFF00] transition hover:opacity-90">
-            🔒 Strategy Vault
-          </Link>
-        </div>
-        <p className="mt-3">Built and Designed by RKYRNSM | &copy; 2026</p>
-      </footer>
+      <SiteFooter />
     </main>
   )
 }

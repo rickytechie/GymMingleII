@@ -30,12 +30,16 @@ const MONTHLY_DONATIONS = [
   { month: 'Jan 2026', fund: 'American Farmers Support Fund', amount: 1600 },
 ]
 
+const CONTRACT_ADDRESS = '0xGYMM...Base'
+
+const BASESCAN_URL = 'https://basescan.org'
+
 const PROOF_TXNS = [
-  { id: '0x7a3f...c9e2', network: 'Ethereum', amount: 12050, date: '2026-04-01', status: 'confirmed' },
-  { id: '0x9b1d...f4a7', network: 'Ethereum', amount: 12050, date: '2026-04-01', status: 'confirmed' },
-  { id: '0x4c8e...b2d1', network: 'Ethereum', amount: 12050, date: '2026-04-01', status: 'confirmed' },
-  { id: '0x2f5a...e8c3', network: 'Ethereum', amount: 12050, date: '2026-04-01', status: 'confirmed' },
-  { id: '0x8d1b...3f6e', network: 'Ethereum', amount: 2300,  date: '2026-06-15', status: 'confirmed' },
+  { id: '0x7a3f...c9e2', network: 'Base L2', explorer: `${BASESCAN_URL}/tx/0x7a3f...c9e2`, amount: 12050, date: '2026-04-01', status: 'confirmed' },
+  { id: '0x9b1d...f4a7', network: 'Base L2', explorer: `${BASESCAN_URL}/tx/0x9b1d...f4a7`, amount: 12050, date: '2026-04-01', status: 'confirmed' },
+  { id: '0x4c8e...b2d1', network: 'Base L2', explorer: `${BASESCAN_URL}/tx/0x4c8e...b2d1`, amount: 12050, date: '2026-04-01', status: 'confirmed' },
+  { id: '0x2f5a...e8c3', network: 'Base L2', explorer: `${BASESCAN_URL}/tx/0x2f5a...e8c3`, amount: 12050, date: '2026-04-01', status: 'confirmed' },
+  { id: '0x8d1b...3f6e', network: 'Base L2', explorer: `${BASESCAN_URL}/tx/0x8d1b...3f6e`, amount: 2300,  date: '2026-06-15', status: 'confirmed' },
 ]
 
 function formatUSD(amount: number): string {
@@ -124,7 +128,11 @@ export function TransparencyDashboard() {
             <tbody>
               {PROOF_TXNS.map((tx) => (
                 <tr key={tx.id} className="border-b border-black/20">
-                  <td className="p-2 font-mono text-black/70">{tx.id}</td>
+                  <td className="p-2">
+                    <a href={tx.explorer} target="_blank" rel="noopener noreferrer" className="font-mono text-black/70 underline hover:text-black">
+                      {tx.id}
+                    </a>
+                  </td>
                   <td className="p-2 text-black/70">{tx.network}</td>
                   <td className="p-2 font-bold text-black">{formatUSD(tx.amount)}</td>
                   <td className="p-2 text-black/70">{tx.date}</td>
@@ -143,7 +151,10 @@ export function TransparencyDashboard() {
       {/* Audit Note */}
       <div className="border-2 border-black bg-black p-4 text-center">
         <p className="text-xs font-bold uppercase tracking-widest text-[#CCFF00]">
-          All transactions verified on-chain · Smart contract audits available upon request
+          All transactions verified on Base L2 · $GYMM Contract: {CONTRACT_ADDRESS}
+        </p>
+        <p className="mt-1 text-[10px] text-white/50">
+          Smart contract audits available upon request · Donations streamed via on-chain vesting
         </p>
       </div>
     </div>

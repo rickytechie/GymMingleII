@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import SiteHeader from '../../src/components/SiteHeader'
+import SiteFooter from '../../src/components/SiteFooter'
 
 const TransparencyDashboard = dynamic(() => import('../../src/components/TransparencyDashboard'), { ssr: false })
 
@@ -52,18 +53,7 @@ export default function VaultPage() {
   if (!unlocked) {
     return (
       <main className="min-h-screen bg-white text-black">
-        <nav className="flex w-full items-center justify-between border-b-2 border-black bg-white px-6 py-4 sm:px-8">
-          <Link href="/" className="block">
-            <p className="text-lg font-black tracking-tight text-black">GymMingle</p>
-            <p className="text-xs font-bold text-black/50">Strategy Vault</p>
-          </Link>
-          <Link
-            href="/"
-            className="border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-black hover:text-white"
-          >
-            ← Back to app
-          </Link>
-        </nav>
+        <SiteHeader />
         <div className="mx-auto flex min-h-[60vh] max-w-md items-center justify-center px-6">
           <div className="w-full border-2 border-black p-8">
             <span className="inline-flex border-2 border-black bg-black text-[#CCFF00] px-3 py-1 text-xs font-bold uppercase tracking-wider">
@@ -95,27 +85,14 @@ export default function VaultPage() {
             </p>
           </div>
         </div>
-        <footer className="border-t-2 border-black bg-white py-8 text-center text-xs text-black/50">
-          <p>&copy; 2026 RICKY RANSOM, LLC · Confidential</p>
-        </footer>
+        <SiteFooter />
       </main>
     )
   }
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <nav className="flex w-full items-center justify-between border-b-2 border-black bg-white px-6 py-4 sm:px-8">
-        <Link href="/" className="block">
-          <p className="text-lg font-black tracking-tight text-black">GymMingle</p>
-          <p className="text-xs font-bold text-black/50">Strategy Vault</p>
-        </Link>
-        <Link
-          href="/"
-          className="border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-black hover:text-white"
-        >
-          ← Back to app
-        </Link>
-      </nav>
+      <SiteHeader />
 
       <div className="mx-auto max-w-5xl px-6 py-16 sm:px-8">
         {/* Hero */}
@@ -272,10 +249,7 @@ export default function VaultPage() {
         </section>
       </div>
 
-      <footer className="border-t-2 border-black bg-white py-8 text-center text-xs text-black/50">
-        <p>Strategy Vault · Confidential · Updated Quarterly</p>
-        <p className="mt-1">&copy; 2026 RICKY RANSOM, LLC · All metrics are independently audited</p>
-      </footer>
+      <SiteFooter />
     </main>
   )
 }

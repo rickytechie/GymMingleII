@@ -25,6 +25,9 @@
   "dependencies": {
     "@react-spring/web": "^10.1.2",
     "@supabase/supabase-js": "^2.110.1",
+    "@thirdweb-dev/react": "^4.9.4",
+    "ethers": "^6.17.0",
+    "framer-motion": "^12.42.2",
     "leaflet": "^1.9.4",
     "nodemailer": "^9.0.3",
     "react-leaflet": "^5.0.0",

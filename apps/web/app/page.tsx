@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
-import LandingHeader from '../src/components/LandingHeader'
+import SiteHeader from '../src/components/SiteHeader'
+import SiteFooter from '../src/components/SiteFooter'
 import WaitlistForm from '../src/components/WaitlistForm'
 import ProfileCard from '../src/components/ProfileCard'
 import ProfileModal from '../src/components/ProfileModal'
@@ -68,7 +68,7 @@ export default function Page() {
 
   return (
     <main className="min-h-screen bg-white text-black">
-      <LandingHeader />
+      <SiteHeader />
 
       {/* HERO */}
       <section className="coastal-section mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
@@ -353,24 +353,7 @@ export default function Page() {
         </div>
       </section>
 
-      <footer className="border-t-2 border-black bg-white py-8 text-center text-xs text-black/50">
-        <div className="mx-auto mb-4 flex max-w-6xl items-center justify-center gap-6 px-6">
-          <Link
-            href="/about"
-            className="border-2 border-black px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-black transition hover:bg-black hover:text-white"
-          >
-            About
-          </Link>
-          <Link
-            href="/vault"
-            className="border-2 border-black bg-black px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-[#CCFF00] transition hover:opacity-90"
-          >
-            🔒 Strategy Vault
-          </Link>
-        </div>
-        <p>&copy; <a href="https://openstreetmap.org/copyright" className="underline hover:text-black">OpenStreetMap</a> contributors. Map data is open access under the <a href="https://opendatacommons.org/licenses/odbl/" className="underline hover:text-black">ODbL</a>.</p>
-        <p className="mt-1">Built and Designed by RKYRNSM | RICKY RANSOM, LLC | &copy; 2026 RICKY RANSOM, LLC</p>
-      </footer>
+      <SiteFooter />
 
       {/* Profile Detail Modal */}
       {selectedProfile && (
