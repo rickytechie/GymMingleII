@@ -19,7 +19,8 @@ const cityKeys = Object.entries(CITY_REGIONS)
 
 export default function Page() {
   const [activeCity, setActiveCity] = useState('nyc')
-  const [profileCount, setProfileCount] = useState(12)
+  const [page, setPage] = useState(1)
+  const profilesPerPage = 12
   const [selectedProfile, setSelectedProfile] = useState<CommunityProfile | null>(null)
   const [decisions, setDecisions] = useState<Record<string, Decision>>({})
 
@@ -29,9 +30,16 @@ export default function Page() {
     [activeCity],
   )
 
+  const allCityProfiles = useMemo(
+    () => getProfilesByCity(activeCity),
+    [activeCity],
+  )
+
+  const totalPages = Math.ceil(allCityProfiles.length / profilesPerPage)
+
   const cityCommunityProfiles = useMemo(
-    () => getProfilesByCity(activeCity).slice(0, profileCount),
-    [activeCity, profileCount],
+    () => allCityProfiles.slice((page - 1) * profilesPerPage, page * profilesPerPage),
+    [allCityProfiles, page],
   )
 
   const totalCommunityProfiles = COMMUNITY_PROFILES.length
@@ -147,7 +155,7 @@ export default function Page() {
             <span className="text-xs font-bold text-black/40 uppercase tracking-wider">Filter by city:</span>
             <select
               value={activeCity}
-              onChange={(e) => { setActiveCity(e.target.value); setProfileCount(12) }}
+              onChange={(e) => { setActiveCity(e.target.value); setPage(1) }}
               className="border-2 border-black bg-white px-3 py-1 text-sm font-bold text-black"
             >
               {cityKeys.map(([key, city]) => (
@@ -169,16 +177,26 @@ export default function Page() {
           ))}
         </div>
 
-        {cityCommunityProfiles.length >= 12 && (
-          <div className="text-center mb-6">
-            <button
-              onClick={() => setProfileCount((c) => c + 12)}
-              className="border-2 border-black bg-white text-black px-6 py-2 text-sm font-bold hover:bg-black hover:text-white transition-colors"
-            >
-              Load more
-            </button>
-          </div>
-        )}
+        {/* Pagination */}
+        <div className="flex items-center justify-center gap-4 mt-8 mb-6">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="border-2 border-black px-4 py-2 text-sm font-bold hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            ← Back
+          </button>
+          <span className="text-sm font-bold text-black/60">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="border-2 border-black px-4 py-2 text-sm font-bold hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            Next →
+          </button>
+        </div>
 
         {/* PREMIUM BADGE LEGEND */}
         <div className="glass-card mb-10 p-6">

@@ -1,25 +1,27 @@
 import Link from 'next/link'
+import AuthStatus from './AuthStatus'
 
 export function LandingHeader() {
   return (
-    <nav className="flex w-full items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-4 backdrop-blur sm:px-8">
+    <nav className="flex w-full items-center justify-between border-b-2 border-black bg-white px-6 py-4 sm:px-8">
       <Link href="/" className="block">
-        <p className="text-lg font-semibold tracking-tight text-slate-900">GymMingle</p>
-        <p className="text-sm text-slate-600">Workout matching that feels human.</p>
+        <p className="text-lg font-black tracking-tight text-black">GymMingle</p>
+        <p className="text-xs font-bold text-black/50">Workout matching that feels human.</p>
       </Link>
       <div className="flex items-center gap-3">
         <Link
           href="/concept"
-          className="rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-[#FF6B35] hover:text-[#FF6B35]"
+          className="border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-black hover:text-white"
         >
-          Explore the concept
+          Concept
         </Link>
         <a
           href="/#waitlist"
-          className="rounded-full bg-[#CCFF00] px-5 py-2 text-sm font-semibold text-slate-950 transition hover:opacity-90"
+          className="border-2 border-black bg-black px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#CCFF00] transition hover:opacity-90"
         >
           Join waitlist
         </a>
+        <AuthStatus />
       </div>
     </nav>
   )
