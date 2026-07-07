@@ -24,7 +24,11 @@
   },
   "dependencies": {
     "@react-spring/web": "^10.1.2",
-    "@supabase/supabase-js": "^2.110.0",
-    "react-tinder-card": "^1.6.4"
+    "@supabase/supabase-js": "^2.110.1",
+    "leaflet": "^1.9.4",
+    "nodemailer": "^9.0.3",
+    "react-leaflet": "^5.0.0",
+    "react-tinder-card": "^1.6.4",
+    "twilio": "^6.0.2"
   }
 }
