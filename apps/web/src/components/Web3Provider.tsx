@@ -1,6 +1,6 @@
 'use client'
 
-import { ThirdwebProvider, ChainId } from '@thirdweb-dev/react'
+import { ThirdwebProvider } from '@thirdweb-dev/react'
 import { Base } from '@thirdweb-dev/chains'
 
 export function Web3Provider({ children }: { children: React.ReactNode }) {

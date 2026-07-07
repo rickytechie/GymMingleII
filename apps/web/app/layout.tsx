@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Web3Provider } from '../src/components/Web3Provider'
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const metadata: Metadata = {
   title: 'GymMingle — Global Lifestyle Orchestration Engine',
   description: 'Workout matching that feels human. Discover fitness partners across 52 markets with MingleCoin-powered premium experiences.',
