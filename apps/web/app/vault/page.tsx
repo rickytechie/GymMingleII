@@ -6,8 +6,6 @@ import dynamic from 'next/dynamic'
 
 const TransparencyDashboard = dynamic(() => import('../../src/components/TransparencyDashboard'), { ssr: false })
 
-const VAULT_PASSWORD = process.env.NEXT_PUBLIC_VAULT_PASSWORD || 'gymmingle2026'
-
 const ECONOMIC_METRICS = {
   mcap: '$4,820,000',
   circulatingSupply: '48,200,000 MC',
@@ -33,12 +31,21 @@ export default function VaultPage() {
   const [unlocked, setUnlocked] = useState(false)
   const [error, setError] = useState('')
 
-  const handleUnlock = () => {
-    if (password === VAULT_PASSWORD) {
-      setUnlocked(true)
-      setError('')
-    } else {
-      setError('Invalid access code')
+  const handleUnlock = async () => {
+    setError('')
+    try {
+      const res = await fetch('/api/auth/vault', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      if (res.ok) {
+        setUnlocked(true)
+      } else {
+        setError('Invalid credentials')
+      }
+    } catch {
+      setError('Network error. Please try again.')
     }
   }
 
