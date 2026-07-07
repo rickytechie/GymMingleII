@@ -1,9 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 
 const TransparencyDashboard = dynamic(() => import('../../src/components/TransparencyDashboard'), { ssr: false })
+
+const VAULT_PASSWORD = process.env.NEXT_PUBLIC_VAULT_PASSWORD || 'gymmingle2026'
 
 const ECONOMIC_METRICS = {
   mcap: '$4,820,000',
@@ -26,9 +29,74 @@ const MILESTONES = [
 ]
 
 export default function VaultPage() {
+  const [password, setPassword] = useState('')
+  const [unlocked, setUnlocked] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleUnlock = () => {
+    if (password === VAULT_PASSWORD) {
+      setUnlocked(true)
+      setError('')
+    } else {
+      setError('Invalid access code')
+    }
+  }
+
+  if (!unlocked) {
+    return (
+      <main className="min-h-screen bg-white text-black">
+        <nav className="flex w-full items-center justify-between border-b-2 border-black bg-white px-6 py-4 sm:px-8">
+          <Link href="/" className="block">
+            <p className="text-lg font-black tracking-tight text-black">GymMingle</p>
+            <p className="text-xs font-bold text-black/50">Strategy Vault</p>
+          </Link>
+          <Link
+            href="/"
+            className="border-2 border-black px-4 py-2 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-black hover:text-white"
+          >
+            ← Back to app
+          </Link>
+        </nav>
+        <div className="mx-auto flex min-h-[60vh] max-w-md items-center justify-center px-6">
+          <div className="w-full border-2 border-black p-8">
+            <span className="inline-flex border-2 border-black bg-black text-[#CCFF00] px-3 py-1 text-xs font-bold uppercase tracking-wider">
+              Restricted Access
+            </span>
+            <h1 className="mt-4 text-2xl font-black text-black">Strategy Vault</h1>
+            <p className="mt-2 text-sm text-black/50">
+              This section is for investors and authorized partners. Enter your access code to continue.
+            </p>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setError('') }}
+              onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
+              placeholder="Access code"
+              className="mt-6 w-full border-2 border-black bg-white px-4 py-3 text-sm font-bold text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-black"
+            />
+            {error && (
+              <p className="mt-2 text-xs font-bold text-red-500">{error}</p>
+            )}
+            <button
+              onClick={handleUnlock}
+              className="mt-4 w-full border-2 border-black bg-black px-6 py-3 text-sm font-bold text-[#CCFF00] transition hover:opacity-90"
+            >
+              Unlock Vault
+            </button>
+            <p className="mt-4 text-xs text-center text-black/40">
+              Authorized investors contact <a href="mailto:hello@rkyrnsm.com" className="underline hover:text-black">hello@rkyrnsm.com</a>
+            </p>
+          </div>
+        </div>
+        <footer className="border-t-2 border-black bg-white py-8 text-center text-xs text-black/50">
+          <p>&copy; 2026 RICKY RANSOM, LLC · Confidential</p>
+        </footer>
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen bg-white text-black">
-      {/* Header */}
       <nav className="flex w-full items-center justify-between border-b-2 border-black bg-white px-6 py-4 sm:px-8">
         <Link href="/" className="block">
           <p className="text-lg font-black tracking-tight text-black">GymMingle</p>
